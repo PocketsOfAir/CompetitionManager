@@ -5,10 +5,10 @@
         private CostsMatrix Costs { get; set; }
         private List<Team> Teams { get; set; }
         private Round NextRound { get; set; }
+        private MatchupMode Mode { get; set; }
         private long PermutationsConsidered { get; set; }
-        private long EarlyExits{ get; set; }
 
-        public RoundGenerator(CostsMatrix costs, List<Team> teams)
+        public RoundGenerator(CostsMatrix costs, List<Team> teams, MatchupMode mode)
         {
             NextRound = new Round
             {
@@ -16,6 +16,7 @@
             };
             Costs = costs;
             Teams = teams;
+            Mode = mode;
         }
 
         public Round FindBestRound()
@@ -30,13 +31,14 @@
                 CaluclateAllRoundsRecursively(roundCandidates, i, 0);
             }
 
-            Console.WriteLine($"Search complete. {PermutationsConsidered} distinct rounds generated and {EarlyExits} early exits");
-            Console.WriteLine($"Search complete. {PermutationsConsidered} distinct rounds generated and {EarlyExits} early exits");
+            Console.WriteLine($"Search complete. {PermutationsConsidered} paths considered");
             return NextRound;
         }
 
         private bool CaluclateAllRoundsRecursively(Team[] teams, int nextMatchIndex, int currentScore)
         {
+            PermutationsConsidered++;
+
             var homeTeam = teams[0];
             var awayTeam = teams[nextMatchIndex];
             var cost = Costs.GetCost(homeTeam, awayTeam);
@@ -44,15 +46,24 @@
             //rematch - early exit
             if (cost == int.MaxValue)
             {
-                PermutationsConsidered++;
                 return false;
             }
-            currentScore += cost;
+
+            if (Mode == MatchupMode.LeastWorstSingleScore)
+            {
+                if (cost > currentScore)
+                {
+                    currentScore = cost;
+                }
+            }
+            else
+            {
+                currentScore += cost;
+            }
 
             //Current round score is worse than our best - early exit
             if (currentScore >= NextRound.RoundCost)
             {
-                PermutationsConsidered++;
                 return false;
             }
 
@@ -60,6 +71,7 @@
             {
                 HomeTeam = homeTeam.Name,
                 AwayTeam = awayTeam.Name,
+                Cost = cost,
             };
 
             if (teams.Length > 2)
@@ -93,7 +105,6 @@
             }
             else
             {
-                PermutationsConsidered++;
                 Console.WriteLine($"Valid round found with score {currentScore}");
                 NextRound.RoundCost = currentScore;
                 NextRound.Matches.Clear();

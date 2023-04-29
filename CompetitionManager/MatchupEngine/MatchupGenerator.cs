@@ -34,7 +34,7 @@ namespace CompetitionManager.MatchupEngine
             Console.WriteLine($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
             stopwatch.Start();
 
-            var roundGenerator = new RoundGenerator(Costs, Teams);
+            var roundGenerator = new RoundGenerator(Costs, Teams, MatchupMode.BestTotalScore);
 
             var nextRound = roundGenerator.FindBestRound();
 
