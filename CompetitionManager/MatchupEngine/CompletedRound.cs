@@ -12,6 +12,6 @@ namespace CompetitionManager.MatchupEngine
 
         public int RoundNumber { get; set; }
 
-        public int RoundCost { get; set; }
+        public bool RatingCalculationRequired { get; set; }
     }
 }

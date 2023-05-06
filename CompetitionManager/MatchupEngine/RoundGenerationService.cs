@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class RoundGenerator
+    internal sealed class RoundGenerationService
     {
         private CostsMatrix Costs { get; set; }
         private List<Team> Teams { get; set; }
@@ -8,7 +8,7 @@
         private MatchupMode Mode { get; set; }
         private long PermutationsConsidered { get; set; }
 
-        public RoundGenerator(CostsMatrix costs, List<Team> teams, MatchupMode mode)
+        public RoundGenerationService(CostsMatrix costs, List<Team> teams, MatchupMode mode)
         {
             NextRound = new Round
             {

@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class MatchupGenerator
+    internal sealed class MatchupEngine
     {
         public int ReplayThreshold { get; private set; }
         public int CurrentRound { get; private set; } = 1;
@@ -12,7 +12,7 @@ namespace CompetitionManager.MatchupEngine
         private List<Team> Teams { get; set; }
         private List<CompletedRound> PreviousRounds { get; set; }
 
-        public MatchupGenerator(int replayThreshold, List<Team> teams, List<CompletedRound> rounds)
+        public MatchupEngine(int replayThreshold, List<Team> teams, List<CompletedRound> rounds)
         {
             Teams = teams;
             PreviousRounds = rounds;
@@ -34,7 +34,7 @@ namespace CompetitionManager.MatchupEngine
             Console.WriteLine($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
             stopwatch.Start();
 
-            var roundGenerator = new RoundGenerator(Costs, Teams, MatchupMode.BestTotalScore);
+            var roundGenerator = new RoundGenerationService(Costs, Teams, MatchupMode.BestTotalScore);
 
             var nextRound = roundGenerator.FindBestRound();
 

@@ -4,32 +4,32 @@ using CompetitionManager.MatchupEngine;
 
 var codeFirstTeams = new List<Team>
 {
-    new Team("SO SAD!", 1192),
-    new Team("Frisbabes", 1230),
-    new Team("Hexagons are the Bestagons", 1206),
-    new Team("Fruit Ninjas", 1100),
-    new Team("If it ain't true, it's Falseong", 1112),
-    new Team("Nunchuckers", 1170),
-    new Team("Radical Roadkill", 1172),
-    new Team("UC Buckets", 1054),
-    new Team("Zombicorns", 1036),
-    new Team("Secret Agents", 1062),
-    new Team("Discplaced", 992),
-    new Team("Down To Huck", 978),
-    new Team("Huckaholics Anonymous", 1020),
-    new Team("Reverse Kelly Red", 881),
-    new Team("Thank Huck Dyls Gone", 1019),
-    new Team("Throws Before Hoes", 1109),
-    new Team("To the Pub!", 974),
-    new Team("Turducken", 1019),
-    new Team("Frozen Fishes", 866),
-    new Team("Redisculous", 907),
-    new Team("Sports!", 928),
-    new Team("Thor's Hammer", 960),
-    new Team("Veni Vidi Vrisbee", 874),
-    new Team("Where's Rosie?", 946),
-    new Team("Huck, Huck Goose", 776),
-    new Team("Bunch of Cuts", 724),
+    new Team("SO SAD!", 1224),
+    new Team("Frisbabes", 1220),
+    new Team("Hexagons are the Bestagons", 1220),
+    new Team("Fruit Ninjas", 1199),
+    new Team("If it ain't true, it's Falseong", 1200),
+    new Team("Nunchuckers", 1192),
+    new Team("Radical Roadkill", 1238),
+    new Team("UC Buckets", 1198),
+    new Team("Zombicorns", 1173),
+    new Team("Secret Agents", 1160),
+    new Team("Discplaced", 1179),
+    new Team("Down To Huck", 1191),
+    new Team("Huckaholics Anonymous", 1228),
+    new Team("Reverse Kelly Red", 1152),
+    new Team("Thank Huck Dyls Gone", 1224),
+    new Team("Throws Before Hoes", 1239),
+    new Team("To the Pub!", 1186),
+    new Team("Turducken", 1198),
+    new Team("Frozen Fishes", 1217),
+    new Team("Redisculous", 1194),
+    new Team("Sports!", 1215),
+    new Team("Thor's Hammer", 1218),
+    new Team("Veni Vidi Vrisbee", 1196),
+    new Team("Where's Rosie?", 1220),
+    new Team("Huck, Huck Goose", 1166),
+    new Team("Bunch of Cuts", 1153),
 };
 
 
@@ -52,7 +52,7 @@ var codeFirstRounds = new List<CompletedRound>
             new CompletedMatch("Reverse Kelly Red",7,"Turducken",15),
             new CompletedMatch("Frisbabes",13,"Radical Roadkill",12),
             new CompletedMatch("Thank Huck Dyls Gone",14,"Frozen Fishes",6),
-        }
+        },
     },
     new CompletedRound()
     {
@@ -71,7 +71,7 @@ var codeFirstRounds = new List<CompletedRound>
             new CompletedMatch("Huckaholics Anonymous",15,"Reverse Kelly Red",8),
             new CompletedMatch("Frisbabes",1,"Hexagons are the Bestagons",0),
             new CompletedMatch("Thank Huck Dyls Gone",7,"Throws Before Hoes",14),
-        }
+        },
     },
     new CompletedRound()
     {
@@ -90,7 +90,7 @@ var codeFirstRounds = new List<CompletedRound>
             new CompletedMatch("Reverse Kelly Red",5,"Thank Huck Dyls Gone",15),
             new CompletedMatch("Frisbabes",11,"SO SAD!",12),
             new CompletedMatch("Throws Before Hoes",11,"Turducken",6),
-        }
+        },
     },
     new CompletedRound()
     {
@@ -109,9 +109,39 @@ var codeFirstRounds = new List<CompletedRound>
             new CompletedMatch("Down To Huck",8,"Thank Huck Dyls Gone",13),
             new CompletedMatch("Frisbabes",15,"Nunchuckers",6),
             new CompletedMatch("Reverse Kelly Red",9,"Redisculous",14),
-        }
+        },
+    },
+    new CompletedRound()
+    {
+        Matches = new List<CompletedMatch>
+        {
+            new CompletedMatch("Zombicorns", 8, "Huckaholics Anonymous", 12),
+            new CompletedMatch("SO SAD!", 10, "If it ain't true, it's Falseong", 8),
+            new CompletedMatch("Hexagons are the Bestagons", 11, "Radical Roadkill", 10),
+            new CompletedMatch("Nunchuckers", 13, "Throws Before Hoes", 7),
+            new CompletedMatch("UC Buckets", 15, "Secret Agents", 7),
+            new CompletedMatch("Discplaced", 6, "Thor's Hammer", 9),
+            new CompletedMatch("Down To Huck", 9, "To the Pub!", 10),
+            new CompletedMatch("Frisbabes", 15, "Fruit Ninjas", 1),
+            new CompletedMatch("Reverse Kelly Red", 5, "Frozen Fishes", 14),
+            new CompletedMatch("Thank Huck Dyls Gone", 9, "Turducken", 7),
+            new CompletedMatch("Redisculous", 8, "Where's Rosie?", 11),
+            new CompletedMatch("Sports!", 14, "Bunch of Cuts", 7),
+            new CompletedMatch("Veni Vidi Vrisbee", 10, "Huck, Huck Goose", 4),
+        },
+        RatingCalculationRequired = true,
     },
 };
 
-var matchupGenerator = new MatchupGenerator(11, codeFirstTeams, codeFirstRounds);
+var ratingUpdater = new RatingUpdateService(codeFirstTeams);
+ratingUpdater.UpdateRatingsForRounds(codeFirstRounds);
+
+Console.WriteLine("");
+foreach (var team in codeFirstTeams)
+{
+    Console.WriteLine($"    new Team(\"{team.Name}\", {team.Rating}),");
+}
+Console.WriteLine("");
+
+var matchupGenerator = new MatchupEngine(11, codeFirstTeams, codeFirstRounds);
 matchupGenerator.GenerateRound();
