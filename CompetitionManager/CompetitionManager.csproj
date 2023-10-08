@@ -7,4 +7,32 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Configuration\CompetitionDetails.json" />
+    <None Remove="Configuration\Completed Rounds.csv" />
+    <None Remove="Configuration\Field Preferences.csv" />
+    <None Remove="Configuration\Teams.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Configuration\CompetitionDetails.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Configuration\Completed Rounds.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Configuration\Field Preferences.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Configuration\Teams.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties configuration_4competitiondetails_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>

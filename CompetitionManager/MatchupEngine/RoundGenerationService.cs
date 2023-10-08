@@ -21,6 +21,12 @@
 
         public Round FindBestRound()
         {
+            if(Teams.Count % 2 != 0)
+            {
+                var error = "Can't generate round: there's an odd number of teams.";
+                Console.WriteLine(error);
+                throw new InvalidDataException(error);
+            }
             var roundCandidates = new Team[Teams.Count];
             for (int j = 0; j < Teams.Count; j++)
             {

@@ -21,7 +21,7 @@ namespace CompetitionManager.MatchupEngine
             CurrentRound = PreviousRounds.Count + 1;
         }
 
-        public void GenerateRound()
+        public List<Match> GenerateRound()
         {
             var stopwatch = new Stopwatch();
             Console.WriteLine("Generating costs and preventing rematches");
@@ -43,10 +43,15 @@ namespace CompetitionManager.MatchupEngine
 
             Console.WriteLine($"Next round generated. Round score is {nextRound.RoundCost}");
 
+            var output = new List<Match>();
+
             foreach (var match in nextRound.Matches)
             {
+                output.Add(match);
                 Console.WriteLine($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
             }
+
+            return output;
         }
 
         private void GenerateCosts()

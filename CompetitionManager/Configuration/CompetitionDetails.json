@@ -1,0 +1,5 @@
+{
+  "StartDate": "(format:dd/MM/yyyy HH:mm)",
+  "GameLength": "(in minutes)",
+  "Location": "(whatever shows up in the website for your venue)"
+}

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CompetitionManager.Transport;
+using System.Data;
 
 namespace CompetitionManager.MatchupEngine
 {
@@ -19,6 +16,37 @@ namespace CompetitionManager.MatchupEngine
             AwayTeam = awayTeam;
             HomeTeamScore = homeTeamScore;
             AwayTeamScore = awayTeamScore;
+        }
+
+        public static CompletedMatch CreateFromSto(CompletedRoundEntrySto sto)
+        {
+            var valid = false;
+            float homeScore;
+            float awayScore;
+
+            if (sto.HomeScore.ToLower() == "win" && sto.AwayScore.ToLower() == "loss")
+            {
+                valid = true;
+                homeScore = 1;
+                awayScore = 0;
+            }
+            else if (sto.AwayScore.ToLower() == "win" && sto.HomeScore.ToLower() == "loss")
+            {
+                valid = true;
+                homeScore = 0;
+                awayScore = 1;
+            }
+            else if (float.TryParse(sto.HomeScore, out homeScore) & float.TryParse(sto.AwayScore, out awayScore))
+            {
+                valid = true;
+            }
+
+            if (!valid)
+            {
+                throw new DataException($"Invalid serialised game between {sto.HomeTeam} and {sto.AwayTeam}");
+            }
+
+            return new CompletedMatch(sto.HomeTeam, (int)Math.Floor(homeScore), sto.AwayTeam, (int)Math.Floor(awayScore));
         }
     }
 }
