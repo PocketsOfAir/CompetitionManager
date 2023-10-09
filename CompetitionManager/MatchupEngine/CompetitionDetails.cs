@@ -10,10 +10,13 @@ namespace CompetitionManager.MatchupEngine
 
         public string Location { get; set; } = string.Empty;
 
+        public CompetitionMode Mode { get; set; }
+
         public static CompetitionDetails CreateFromSto(CompetitionDetailsSto details)
         {
             var valid = int.TryParse(details.GameLength, out var gameLength);
             valid &= DateTime.TryParse(details.StartDate, out var startDate);
+            valid &= Enum.TryParse<CompetitionMode>(details.Mode, out var mode);
             if (valid)
             {
                 var output = new CompetitionDetails
@@ -21,6 +24,7 @@ namespace CompetitionManager.MatchupEngine
                     Location = details.Location,
                     StartDate = startDate,
                     GameLength = gameLength,
+                    Mode = mode,
                 };
                 return output;
             }

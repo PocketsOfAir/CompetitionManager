@@ -1,35 +1,47 @@
-﻿using System.Diagnostics;
+﻿using CompetitionManager.Transport;
+using System.Diagnostics;
 
-namespace CompetitionManager.MatchupEngine
+namespace CompetitionManager.MatchupEngine.Strategies
 {
-    internal sealed class MatchupEngine
+    internal sealed class DynamicMatchupStrategy : IMatchupStrategy
     {
-        public int ReplayThreshold { get; private set; }
+        public int ReplayThreshold { get; private set; } = int.MaxValue;
         public int CurrentRound { get; private set; } = 1;
-
         private CostsMatrix Costs { get; set; }
-
         private List<Team> Teams { get; set; }
         private List<CompletedRound> PreviousRounds { get; set; }
+        private CompetitionDetails CompetitionDetails { get; set; }
 
-        public MatchupEngine(int replayThreshold, List<Team> teams, List<CompletedRound> rounds)
+        public DynamicMatchupStrategy(CompetitionDetails competitionDetails)
         {
-            Teams = teams;
-            PreviousRounds = rounds;
+            Teams = CsvUtils.LoadTeams();
+            PreviousRounds = CsvUtils.LoadCompletedRounds();
             Costs = new CostsMatrix(Teams);
-            ReplayThreshold = replayThreshold;
             CurrentRound = PreviousRounds.Count + 1;
+            CompetitionDetails = competitionDetails;
         }
 
-        public List<Match> GenerateRound()
+        public void ExportMatches()
         {
             var stopwatch = new Stopwatch();
-            Console.WriteLine("Generating costs and preventing rematches");
             stopwatch.Start();
-            
+
+            var ratingUpdater = new RatingUpdateService(Teams);
+            ratingUpdater.UpdateRatingsForRounds(PreviousRounds);
+
+            Console.WriteLine("");
+            Console.WriteLine("Calculating Ratings");
+            foreach (var team in Teams.OrderByDescending(t => t.Rating))
+            {
+                Console.WriteLine($"    Team: {team.Name}, Rating: {team.Rating}");
+            }
+            Console.WriteLine("");
+
+            Console.WriteLine("Generating costs and preventing rematches");
+
             GenerateCosts();
             PreventRematches();
-            
+
             stopwatch.Stop();
             Console.WriteLine($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
             stopwatch.Start();
@@ -51,7 +63,9 @@ namespace CompetitionManager.MatchupEngine
                 Console.WriteLine($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
             }
 
-            return output;
+            var competitionStartDate = CompetitionDetails.StartDate;
+            var roundDate = competitionStartDate.AddDays(PreviousRounds.Count * 7);
+            CsvUtils.ExportMatches(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"Round {PreviousRounds.Count + 1}.csv");
         }
 
         private void GenerateCosts()
