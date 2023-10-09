@@ -166,6 +166,14 @@ namespace CompetitionManager.Transport
                 Encoding = Encoding.UTF8
             };
 
+            var allText = new StringBuilder();
+            foreach (var entry in round.OrderBy(r => r.FieldNumber ))
+            {
+                allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+            }
+
+            File.WriteAllText(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber} email.txt"), allText.ToString());
+
             var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber}.csv");
 
             using var writer = new StreamWriter(outputCsvPath);
