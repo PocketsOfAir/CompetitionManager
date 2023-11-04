@@ -33,6 +33,12 @@
                     Console.WriteLine($"\tExpected result is {match.HomeTeam} {Math.Round(homeTeamExpectedScore * 100)}% : {match.AwayTeam} {Math.Round((1 - homeTeamExpectedScore) * 100)}%");
                     Console.WriteLine($"\tActual result is {match.HomeTeam} {match.HomeTeamScore} : {match.AwayTeam} {match.AwayTeamScore}");
 
+                    if (match.ExcludeFromRatings)
+                    {
+                        Console.WriteLine($"\tFORFEIT - RATINGS UNCHANGED: {match.HomeTeam} ({Teams[match.HomeTeam].Rating}) and {match.AwayTeam} ({Teams[match.AwayTeam].Rating})");
+                        continue;
+                    }
+
                     if (match.HomeTeamScore > match.AwayTeamScore)
                     {
                         var winnerPot = wager - match.AwayTeamScore;
