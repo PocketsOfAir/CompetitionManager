@@ -1,4 +1,6 @@
-﻿namespace CompetitionManager.MatchupEngine
+﻿using CompetitionManager.Util;
+
+namespace CompetitionManager.MatchupEngine
 {
     internal sealed class RatingUpdateService
     {
@@ -29,13 +31,13 @@
                     var homeTeamWager = (int)Math.Round(homeTeamExpectedScore * wager);
                     var awayTeamWager = wager - homeTeamWager;
 
-                    Console.WriteLine($"Rating change for game between {match.HomeTeam} (prior rating: {Teams[match.HomeTeam].Rating}) and {match.AwayTeam} (prior rating: {Teams[match.AwayTeam].Rating})");
-                    Console.WriteLine($"\tExpected result is {match.HomeTeam} {Math.Round(homeTeamExpectedScore * 100)}% : {match.AwayTeam} {Math.Round((1 - homeTeamExpectedScore) * 100)}%");
-                    Console.WriteLine($"\tActual result is {match.HomeTeam} {match.HomeTeamScore} : {match.AwayTeam} {match.AwayTeamScore}");
+                    LoggingService.Instance.Log($"Rating change for game between {match.HomeTeam} (prior rating: {Teams[match.HomeTeam].Rating}) and {match.AwayTeam} (prior rating: {Teams[match.AwayTeam].Rating})");
+                    LoggingService.Instance.Log($"\tExpected result is {match.HomeTeam} {Math.Round(homeTeamExpectedScore * 100)}% : {match.AwayTeam} {Math.Round((1 - homeTeamExpectedScore) * 100)}%");
+                    LoggingService.Instance.Log($"\tActual result is {match.HomeTeam} {match.HomeTeamScore} : {match.AwayTeam} {match.AwayTeamScore}");
 
                     if (match.ExcludeFromRatings)
                     {
-                        Console.WriteLine($"\tFORFEIT - RATINGS UNCHANGED: {match.HomeTeam} ({Teams[match.HomeTeam].Rating}) and {match.AwayTeam} ({Teams[match.AwayTeam].Rating})");
+                        LoggingService.Instance.Log($"\tFORFEIT - RATINGS UNCHANGED: {match.HomeTeam} ({Teams[match.HomeTeam].Rating}) and {match.AwayTeam} ({Teams[match.AwayTeam].Rating})");
                         continue;
                     }
 
@@ -56,7 +58,7 @@
                         Teams[match.HomeTeam].Rating = Teams[match.HomeTeam].Rating - homeTeamWager + wager / 2;
                         Teams[match.AwayTeam].Rating = Teams[match.AwayTeam].Rating - awayTeamWager + wager / 2;
                     }
-                    Console.WriteLine($"\tNew Ratings: {match.HomeTeam} ({Teams[match.HomeTeam].Rating}) and {match.AwayTeam} ({Teams[match.AwayTeam].Rating})");
+                    LoggingService.Instance.Log($"\tNew Ratings: {match.HomeTeam} ({Teams[match.HomeTeam].Rating}) and {match.AwayTeam} ({Teams[match.AwayTeam].Rating})");
                 }
             }
         }

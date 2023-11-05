@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using CompetitionManager.Util;
+using System.Diagnostics;
 
 namespace CompetitionManager.MatchupEngine
 {
@@ -24,14 +25,14 @@ namespace CompetitionManager.MatchupEngine
         public List<Match> GenerateRound()
         {
             var stopwatch = new Stopwatch();
-            Console.WriteLine("Generating costs and preventing rematches");
+            LoggingService.Instance.Log("Generating costs and preventing rematches");
             stopwatch.Start();
             
             GenerateCosts();
             PreventRematches();
             
             stopwatch.Stop();
-            Console.WriteLine($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
+            LoggingService.Instance.Log($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
             stopwatch.Start();
 
             var roundGenerator = new RoundGenerationService(Costs, Teams, MatchupMode.BestTotalScore);
@@ -39,16 +40,16 @@ namespace CompetitionManager.MatchupEngine
             var nextRound = roundGenerator.FindBestRound();
 
             stopwatch.Stop();
-            Console.WriteLine($"Round generated after {stopwatch.ElapsedMilliseconds}ms.");
+            LoggingService.Instance.Log($"Round generated after {stopwatch.ElapsedMilliseconds}ms.");
 
-            Console.WriteLine($"Next round generated. Round score is {nextRound.RoundCost}");
+            LoggingService.Instance.Log($"Next round generated. Round score is {nextRound.RoundCost}");
 
             var output = new List<Match>();
 
             foreach (var match in nextRound.Matches)
             {
                 output.Add(match);
-                Console.WriteLine($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
+                LoggingService.Instance.Log($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
             }
 
             return output;

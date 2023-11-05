@@ -1,18 +1,19 @@
 ﻿using CompetitionManager.MatchupEngine;
 using CompetitionManager.Transport;
+using CompetitionManager.Util;
 
 var teams = CsvUtils.LoadTeams();
 var completedRounds = CsvUtils.LoadCompletedRounds();
 var ratingUpdater = new RatingUpdateService(teams);
 ratingUpdater.UpdateRatingsForRounds(completedRounds);
 
-Console.WriteLine("");
-Console.WriteLine("Current Calculated Ratings");
+LoggingService.Instance.Log("");
+LoggingService.Instance.Log("Current Calculated Ratings");
 foreach (var team in teams.OrderByDescending(t => t.Rating))
 {
-    Console.WriteLine($"    Team: {team.Name}, Rating: {team.Rating}");
+    LoggingService.Instance.Log($"    Team: {team.Name}, Rating: {team.Rating}");
 }
-Console.WriteLine("");
+LoggingService.Instance.Log("");
 
 var matchupGenerator = new MatchupEngine(11, teams, completedRounds);
 var matches = matchupGenerator.GenerateRound();

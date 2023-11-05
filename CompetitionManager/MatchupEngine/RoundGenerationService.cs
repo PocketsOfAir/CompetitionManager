@@ -1,4 +1,6 @@
-﻿namespace CompetitionManager.MatchupEngine
+﻿using CompetitionManager.Util;
+
+namespace CompetitionManager.MatchupEngine
 {
     internal sealed class RoundGenerationService
     {
@@ -24,7 +26,7 @@
             if(Teams.Count % 2 != 0)
             {
                 var error = "Can't generate round: there's an odd number of teams.";
-                Console.WriteLine(error);
+                LoggingService.Instance.Log(error);
                 throw new InvalidDataException(error);
             }
             var roundCandidates = new Team[Teams.Count];
@@ -37,7 +39,7 @@
                 CaluclateAllRoundsRecursively(roundCandidates, i, 0);
             }
 
-            Console.WriteLine($"Search complete. {PermutationsConsidered} paths considered");
+            LoggingService.Instance.Log($"Search complete. {PermutationsConsidered} paths considered");
             return NextRound;
         }
 
@@ -111,7 +113,7 @@
             }
             else
             {
-                Console.WriteLine($"Valid round found with score {currentScore}");
+                LoggingService.Instance.Log($"Valid round found with score {currentScore}");
                 NextRound.RoundCost = currentScore;
                 NextRound.Matches.Clear();
                 NextRound.Matches.Push(match);
