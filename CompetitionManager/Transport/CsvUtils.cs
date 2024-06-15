@@ -88,7 +88,7 @@ namespace CompetitionManager.Transport
             return completedRounds;
         }
 
-        public static void SaveRound(List<Match> matches, DateTime startDate, int duration, string location, int roundNumber)
+        public static void ExportMatches(List<Match> matches, DateTime startDate, int duration, string location, string filename)
         {
             var round = new List<RoundEntrySto>();
 
@@ -175,6 +175,7 @@ namespace CompetitionManager.Transport
             File.WriteAllText(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber} email.txt"), allText.ToString());
 
             var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber}.csv");
+            var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", filename);
 
             using var writer = new StreamWriter(outputCsvPath);
             using var csvOut = new CsvWriter(writer, csvConfig);
