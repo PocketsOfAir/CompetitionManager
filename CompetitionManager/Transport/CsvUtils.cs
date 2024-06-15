@@ -172,10 +172,9 @@ namespace CompetitionManager.Transport
                 allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
             }
 
-            File.WriteAllText(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber} email.txt"), allText.ToString());
+            File.WriteAllText(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"{filename} email.txt"), allText.ToString());
 
-            var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Round {roundNumber}.csv");
-            var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", filename);
+            var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"{ filename}.csv");
 
             using var writer = new StreamWriter(outputCsvPath);
             using var csvOut = new CsvWriter(writer, csvConfig);

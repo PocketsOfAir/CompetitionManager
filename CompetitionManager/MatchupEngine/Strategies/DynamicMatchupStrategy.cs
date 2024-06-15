@@ -68,7 +68,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
             var competitionStartDate = CompetitionDetails.StartDate;
             var roundDate = competitionStartDate.AddDays(PreviousRounds.Count * 7);
-            CsvUtils.ExportMatches(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"Round {PreviousRounds.Count + 1}.csv");
+            CsvUtils.ExportMatches(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"Round {PreviousRounds.Count + 1}");
         }
 
         private void GenerateCosts()

@@ -15,9 +15,6 @@ foreach (var team in teams.OrderByDescending(t => t.Rating))
 }
 LoggingService.Instance.Log("");
 
-var matchupGenerator = new MatchupEngine(11, teams, completedRounds);
-var matches = matchupGenerator.GenerateRound();
-
 var compConfig = JsonUtils.LoadCompetitionDetails();
 var matchupGenerator = MatchupStrategyFactory.GetMatchupEngine(compConfig);
 matchupGenerator.ExportMatches();
