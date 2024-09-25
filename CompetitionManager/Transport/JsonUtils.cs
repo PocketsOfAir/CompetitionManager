@@ -10,12 +10,7 @@ namespace CompetitionManager.Transport
         {
             var path = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", "CompetitionDetails.json");
             var jsonString = File.ReadAllText(path);
-            var details = JsonSerializer.Deserialize<CompetitionDetailsSto>(jsonString);
-            if (details == null)
-            {
-                throw new InvalidDataException("Failed to find CompetitionDetails.json");
-            }
-
+            var details = JsonSerializer.Deserialize<CompetitionDetailsSto>(jsonString) ?? throw new InvalidDataException("Failed to find CompetitionDetails.json");
             var output = CompetitionDetails.CreateFromSto(details);
 
             return output;

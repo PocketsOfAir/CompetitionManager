@@ -1,15 +1,19 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class Team
+    internal sealed class Team(string name, int rating)
     {
-        public string Name { get; set; }
-        public int Rating { get; set; }
+        public string Name { get; set; } = name;
+        public int Rating { get; set; } = rating;
+        public bool IsBye { get; set; } = false;
         public int CostsMatrixIndex { get; set; } = 0;
 
-        public Team(string name, int rating)
+        public static Team CreateBye()
         {
-            Rating = rating;
-            Name = name;
+            var result = new Team("Bye", 0)
+            {
+                IsBye = true
+            };
+            return result;
         }
     }
 }

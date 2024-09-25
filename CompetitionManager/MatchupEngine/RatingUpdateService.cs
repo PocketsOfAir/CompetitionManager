@@ -4,10 +4,9 @@ namespace CompetitionManager.MatchupEngine
 {
     internal sealed class RatingUpdateService
     {
-        private Dictionary<string, Team> Teams { get; set; }
+        private Dictionary<string, Team> Teams { get; set; } = [];
         public RatingUpdateService(List<Team> teams)
         {
-            Teams = new Dictionary<string, Team>();
             foreach (var team in teams)
             {
                 Teams[team.Name] = team;

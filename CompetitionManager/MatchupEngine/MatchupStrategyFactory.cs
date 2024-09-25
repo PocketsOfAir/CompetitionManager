@@ -1,5 +1,4 @@
 ﻿using CompetitionManager.MatchupEngine.Strategies;
-using CompetitionManager.Transport;
 
 namespace CompetitionManager.MatchupEngine
 {

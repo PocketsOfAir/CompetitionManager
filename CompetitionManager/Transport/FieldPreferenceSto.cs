@@ -9,9 +9,5 @@ namespace CompetitionManager.Transport
         public string Team { get; set; } = string.Empty;
         [Index(1)]
         public int FieldNumber { get; set; } = 0;
-
-        public FieldPreferenceSto()
-        {
-        }
     }
 }

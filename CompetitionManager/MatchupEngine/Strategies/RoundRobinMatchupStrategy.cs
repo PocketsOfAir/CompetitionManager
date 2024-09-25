@@ -1,11 +1,8 @@
 ﻿namespace CompetitionManager.MatchupEngine.Strategies
 {
-    internal sealed class RoundRobinMatchupStrategy : IMatchupStrategy
+    internal sealed class RoundRobinMatchupStrategy(CompetitionDetails competitionDetails) : IMatchupStrategy
     {
-        public RoundRobinMatchupStrategy(CompetitionDetails competitionDetails)
-        {
-
-        }
+        private CompetitionDetails CompetitionDetails { get; set; } = competitionDetails;
 
         public void ExportMatches()
         {

@@ -1,8 +1,8 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal class CostsMatrix
+    internal sealed class CostsMatrix
     {
-        private Dictionary<string, int> TeamIdLookup { get; set; } = new Dictionary<string, int>();
+        private Dictionary<string, int> TeamIdLookup { get; set; } = [];
 
         private int[,] MatchupCosts { get; set; }
 
@@ -37,6 +37,11 @@
         public void CalculateCost(Team team1, Team team2)
         {
             var cost = Math.Abs(team1.Rating - team2.Rating);
+            if (team1.IsBye || team2.IsBye)
+            {
+                //all teams are equally valid for byes
+                cost = 0;
+            }
             var team1Index = TeamIdLookup[team1.Name];
             var team2Index = TeamIdLookup[team2.Name];
 

@@ -27,26 +27,26 @@ namespace CompetitionManager.MatchupEngine
             float awayScore;
             var exclude = false;
 
-            if (sto.HomeScore.ToLower() == "win" && sto.AwayScore.ToLower() == "loss")
+            if (sto.HomeScore.Equals("win", StringComparison.CurrentCultureIgnoreCase) && sto.AwayScore.Equals("loss", StringComparison.CurrentCultureIgnoreCase))
             {
                 valid = true;
                 homeScore = 1;
                 awayScore = 0;
             }
-            else if (sto.AwayScore.ToLower() == "win" && sto.HomeScore.ToLower() == "loss")
+            else if (sto.AwayScore.Equals("win", StringComparison.CurrentCultureIgnoreCase) && sto.HomeScore.Equals("loss", StringComparison.CurrentCultureIgnoreCase))
             {
                 valid = true;
                 homeScore = 0;
                 awayScore = 1;
             }
-            else if (sto.HomeScore.ToLower() == "win" && sto.AwayScore.ToLower() == "forfeit")
+            else if (sto.HomeScore.Equals("win", StringComparison.CurrentCultureIgnoreCase) && sto.AwayScore.Equals("forfeit", StringComparison.CurrentCultureIgnoreCase))
             {
                 valid = true;
                 homeScore = 0;
                 awayScore = 0;
                 exclude = true;
             }
-            else if (sto.AwayScore.ToLower() == "win" && sto.HomeScore.ToLower() == "forfeit")
+            else if (sto.AwayScore.Equals("win", StringComparison.CurrentCultureIgnoreCase) && sto.HomeScore.Equals("forfeit", StringComparison.CurrentCultureIgnoreCase))
             {
                 valid = true;
                 homeScore = 0;

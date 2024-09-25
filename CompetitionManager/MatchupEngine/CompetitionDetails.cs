@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal class CompetitionDetails
+    internal sealed class CompetitionDetails
     {
         public DateTime StartDate { get; set; }
 

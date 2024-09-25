@@ -2,7 +2,7 @@
 {
     internal sealed class CompletedRound
     {
-        public List<CompletedMatch> Matches { get; set; } = new List<CompletedMatch>();
+        public List<CompletedMatch> Matches { get; set; } = [];
 
         public int RoundNumber { get; set; }
 
