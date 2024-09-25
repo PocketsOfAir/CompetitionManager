@@ -20,31 +20,50 @@
             }
         }
 
+        public void GenerateCosts(List<Team> teams)
+        {
+            for (int i = 0; i < teams.Count; i++)
+            {
+                var team1 = teams[i];
+                for (int j = i + 1; j < teams.Count; j++)
+                {
+                    var team2 = teams[j];
+                    var cost = Math.Abs(team1.Rating - team2.Rating);
+                    if (team1.IsBye || team2.IsBye)
+                    {
+                        //all teams are equally valid for byes
+                        cost = 0;
+                    }
+                    SetCost(team1.Name, team2.Name, cost);
+                }
+            }
+        }
+
+        public void PreventRematches(List<CompletedRound> previousRounds, int currentRound, int replayThreshold)
+        {
+            foreach (var round in previousRounds)
+            {
+                var roundsSinceMatch = currentRound - round.RoundNumber;
+                if (roundsSinceMatch < replayThreshold)
+                {
+                    foreach (var match in round.Matches)
+                    {
+                        SetCost(match.HomeTeam, match.AwayTeam, int.MaxValue);
+                    }
+                }
+            }
+        }
+
         public int GetCost(Team team1, Team team2)
         {
             return MatchupCosts[team1.CostsMatrixIndex, team2.CostsMatrixIndex];
         }
 
-        public void SetCost(string team1, string team2, int cost)
+        private void SetCost(string team1, string team2, int cost)
         {
             var team1Index = TeamIdLookup[team1];
             var team2Index = TeamIdLookup[team2];
             //set both t1:t2 and t2:t1 so that retrieval is order-agnostic
-            MatchupCosts[team1Index, team2Index] = cost;
-            MatchupCosts[team2Index, team1Index] = cost;
-        }
-
-        public void CalculateCost(Team team1, Team team2)
-        {
-            var cost = Math.Abs(team1.Rating - team2.Rating);
-            if (team1.IsBye || team2.IsBye)
-            {
-                //all teams are equally valid for byes
-                cost = 0;
-            }
-            var team1Index = TeamIdLookup[team1.Name];
-            var team2Index = TeamIdLookup[team2.Name];
-
             MatchupCosts[team1Index, team2Index] = cost;
             MatchupCosts[team2Index, team1Index] = cost;
         }

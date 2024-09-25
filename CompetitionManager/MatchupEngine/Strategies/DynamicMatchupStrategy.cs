@@ -1,5 +1,5 @@
-using CompetitionManager.Util;
 using CompetitionManager.Transport;
+using CompetitionManager.Util;
 using System.Diagnostics;
 
 namespace CompetitionManager.MatchupEngine.Strategies
@@ -20,6 +20,11 @@ namespace CompetitionManager.MatchupEngine.Strategies
             Costs = new CostsMatrix(Teams);
             CurrentRound = PreviousRounds.Count + 1;
             CompetitionDetails = competitionDetails;
+
+            if (Teams.Count % 2 != 0)
+            {
+                Teams.Add(Team.CreateBye());
+            }
         }
 
         public void ExportMatches()
@@ -41,9 +46,8 @@ namespace CompetitionManager.MatchupEngine.Strategies
             Console.WriteLine("");
 
             Console.WriteLine("Generating costs and preventing rematches");
-
-            GenerateCosts();
-            PreventRematches();
+            Costs.GenerateCosts(Teams);
+            Costs.PreventRematches(PreviousRounds, CurrentRound, ReplayThreshold);
 
             stopwatch.Stop();
             LoggingService.Instance.Log($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
@@ -62,41 +66,20 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
             foreach (var match in nextRound.Matches)
             {
-                output.Add(match);
-                LoggingService.Instance.Log($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
+                if (match.IsBye)
+                {
+                    LoggingService.Instance.Log($"\t {match.HomeTeam} BYE");
+                }
+                else
+                {
+                    output.Add(match);
+                    LoggingService.Instance.Log($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
+                }
             }
 
             var competitionStartDate = CompetitionDetails.StartDate;
             var roundDate = competitionStartDate.AddDays(PreviousRounds.Count * 7);
             CsvUtils.ExportMatches(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"Round {PreviousRounds.Count + 1}");
-        }
-
-        private void GenerateCosts()
-        {
-            for (int i = 0; i < Teams.Count; i++)
-            {
-                var team1 = Teams[i];
-                for (int j = i + 1; j < Teams.Count; j++)
-                {
-                    var team2 = Teams[j];
-                    Costs.CalculateCost(team1, team2);
-                }
-            }
-        }
-
-        private void PreventRematches()
-        {
-            foreach (var round in PreviousRounds)
-            {
-                var roundsSinceMatch = CurrentRound - round.RoundNumber;
-                if (roundsSinceMatch < ReplayThreshold)
-                {
-                    foreach (var match in round.Matches)
-                    {
-                        Costs.SetCost(match.HomeTeam, match.AwayTeam, int.MaxValue);
-                    }
-                }
-            }
         }
     }
 }

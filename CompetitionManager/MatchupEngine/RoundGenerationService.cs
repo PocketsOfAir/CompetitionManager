@@ -25,7 +25,9 @@ namespace CompetitionManager.MatchupEngine
         {
             if(Teams.Count % 2 != 0)
             {
-                Teams.Add(Team.CreateBye());
+                var error = "Can't generate round: there's an odd number of teams.";
+                LoggingService.Instance.Log(error);
+                throw new InvalidDataException(error);
             }
             var roundCandidates = new Team[Teams.Count];
             for (int j = 0; j < Teams.Count; j++)
@@ -78,6 +80,7 @@ namespace CompetitionManager.MatchupEngine
                 HomeTeam = homeTeam.Name,
                 AwayTeam = awayTeam.Name,
                 Cost = cost,
+                IsBye = homeTeam.IsBye || awayTeam.IsBye,
             };
 
             if (teams.Length > 2)
