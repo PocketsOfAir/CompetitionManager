@@ -10,6 +10,8 @@ namespace CompetitionManager.MatchupEngine
 
         public string Location { get; set; } = string.Empty;
 
+        public string CompetitionName { get; set; } = string.Empty;
+
         public CompetitionMode Mode { get; set; }
 
         public static CompetitionDetails CreateFromSto(CompetitionDetailsSto details)
@@ -21,6 +23,7 @@ namespace CompetitionManager.MatchupEngine
             {
                 var output = new CompetitionDetails
                 {
+                    CompetitionName = details.CompetitionName,
                     Location = details.Location,
                     StartDate = startDate,
                     GameLength = gameLength,

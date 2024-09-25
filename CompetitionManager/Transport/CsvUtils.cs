@@ -11,7 +11,7 @@ namespace CompetitionManager.Transport
     {
         public static List<Team> LoadTeams()
         {
-            var teamsCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", "Teams.csv");
+            var teamsCsvPath = PathUtils.GetConfigFilePath("Teams.csv");
             var teams = new List<Team>();
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -33,7 +33,7 @@ namespace CompetitionManager.Transport
 
         public static List<FieldPreference> LoadFieldPreferences()
         {
-            var teamsCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", "Field Preferences.csv");
+            var teamsCsvPath = PathUtils.GetConfigFilePath("Field Preferences.csv");
             var preferences = new List<FieldPreference>();
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -55,7 +55,7 @@ namespace CompetitionManager.Transport
 
         public static List<CompletedRound> LoadCompletedRounds()
         {
-            var csvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", "Completed Rounds.csv");
+            var csvPath = PathUtils.GetConfigFilePath("Completed Rounds.csv");
             var completedRounds = new List<CompletedRound>();
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -88,9 +88,9 @@ namespace CompetitionManager.Transport
             return completedRounds;
         }
 
-        public static void ExportMatches(List<Match> matches, DateTime startDate, int duration, string location, string filename)
+        private static RoundSto GetRoundAsSto(List<Match> matches, DateTime startDate, int duration, string location)
         {
-            var round = new List<RoundEntrySto>();
+            var round = new RoundSto();
 
             var endDate = startDate.AddMinutes(duration);
 
@@ -100,6 +100,11 @@ namespace CompetitionManager.Transport
 
             foreach (var match in matches)
             {
+                if (match.IsBye)
+                {
+                    round.ByeTeam = match.HomeTeam + match.AwayTeam;
+                    continue;
+                }
                 var entry = new RoundEntrySto
                 {
                     HomeTeam = match.HomeTeam,
@@ -120,7 +125,7 @@ namespace CompetitionManager.Transport
                         allocated = true;
                         if (fieldAllocation[entry.FieldNumber] == true)
                         {
-                            foreach (var entryToReallocate in round)
+                            foreach (var entryToReallocate in round.Matches)
                             {
                                 if (entryToReallocate.FieldNumber == preference.FieldNumber)
                                 {
@@ -157,28 +162,72 @@ namespace CompetitionManager.Transport
                     }
                 }
 
-                round.Add(entry);
+                round.Matches.Add(entry);
             }
 
+            return round;
+        }
+
+        private static void WriteMatchesToCSV(List<RoundEntrySto> matches, string filename)
+        {
             var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
                 Encoding = Encoding.UTF8
             };
 
-            var allText = new StringBuilder();
-            foreach (var entry in round.OrderBy(r => r.FieldNumber ))
-            {
-                allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
-            }
-
-            File.WriteAllText(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"{filename} email.txt"), allText.ToString());
-
-            var outputCsvPath = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"{ filename}.csv");
+            var outputCsvPath = PathUtils.GetOutputFilePath($"{filename}.csv");
 
             using var writer = new StreamWriter(outputCsvPath);
             using var csvOut = new CsvWriter(writer, csvConfig);
-            csvOut.WriteRecords(round);
+            csvOut.WriteRecords(matches);
+        }
+
+        public static void ExportRounds(List<List<Match>> rounds, DateTime startDate, int duration, string location, string filename)
+        {
+            var allMatches = new List<RoundEntrySto>();
+            for (var i = 0; i < rounds.Count; i++)
+            {
+                var round = rounds[i];
+                var roundDate = startDate.AddDays(i * 7);
+                var matches = GetRoundAsSto(round, roundDate, duration, location);
+
+                var allText = new StringBuilder();
+                foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))
+                {
+                    allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                }
+                if (matches.ByeTeam != string.Empty)
+                {
+                    allText.AppendLine($"Bye: {matches.ByeTeam}");
+                }
+
+
+                File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} round {i+1} email.txt"), allText.ToString());
+
+                allMatches.AddRange(matches.Matches);
+            }
+
+            WriteMatchesToCSV(allMatches, filename);
+        }
+
+        public static void ExportRound(List<Match> round, DateTime startDate, int duration, string location, string filename)
+        {
+            var matches = GetRoundAsSto(round, startDate, duration, location);
+
+            var allText = new StringBuilder();
+            foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))
+            {
+                allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+            }
+            if (matches.ByeTeam != string.Empty)
+            {
+                allText.AppendLine($"Bye: {matches.ByeTeam}");
+            }
+
+            File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} email.txt"), allText.ToString());
+
+            WriteMatchesToCSV(matches.Matches, filename);
         }
     }
 }

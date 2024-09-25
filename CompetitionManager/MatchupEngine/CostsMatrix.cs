@@ -16,7 +16,7 @@
             for (int i = 0; i < TeamCount; i++)
             {
                 TeamIdLookup[teams[i].Name] = i;
-                teams[i].CostsMatrixIndex = i;
+                teams[i].MatrixIndex = i;
             }
         }
 
@@ -56,7 +56,7 @@
 
         public int GetCost(Team team1, Team team2)
         {
-            return MatchupCosts[team1.CostsMatrixIndex, team2.CostsMatrixIndex];
+            return MatchupCosts[team1.MatrixIndex, team2.MatrixIndex];
         }
 
         private void SetCost(string team1, string team2, int cost)

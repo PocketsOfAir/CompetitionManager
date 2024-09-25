@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using CompetitionManager.Transport;
 
 namespace CompetitionManager.Util
 {
@@ -11,7 +11,7 @@ namespace CompetitionManager.Util
 
         private LoggingService()
         {
-            FileName = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Configuration", $"Log_{DateTime.Now:yyyy-MM-dd HH.mm.ss.fff}.txt");
+            FileName = PathUtils.GetLogFilePath($"Log_{DateTime.Now:yyyy-MM-dd HH.mm.ss.fff}.txt");
         }
 
         public void Log(string message)

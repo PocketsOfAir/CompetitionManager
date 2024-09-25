@@ -72,14 +72,14 @@ namespace CompetitionManager.MatchupEngine.Strategies
                 }
                 else
                 {
-                    output.Add(match);
                     LoggingService.Instance.Log($"\t {match.HomeTeam} vs. {match.AwayTeam} (cost: {match.Cost})");
                 }
+                output.Add(match);
             }
 
             var competitionStartDate = CompetitionDetails.StartDate;
             var roundDate = competitionStartDate.AddDays(PreviousRounds.Count * 7);
-            CsvUtils.ExportMatches(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"Round {PreviousRounds.Count + 1}");
+            CsvUtils.ExportRound(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Location, $"{CompetitionDetails.CompetitionName} Round {PreviousRounds.Count + 1}");
         }
     }
 }

@@ -6,15 +6,12 @@ namespace CompetitionManager.MatchupEngine
     {
         public static IMatchupStrategy GetMatchupEngine(CompetitionDetails competitionDetails)
         {
-            switch (competitionDetails.Mode)
+            return competitionDetails.Mode switch
             {
-                case CompetitionMode.DynamicRounds:
-                    var matchupGenerator = new DynamicMatchupStrategy(competitionDetails);
-                    return matchupGenerator;
-                case CompetitionMode.None:
-                default:
-                    throw new ArgumentException($"Invalid competition mode '{competitionDetails.Mode}'");
-            }
+                CompetitionMode.DynamicRounds => new DynamicMatchupStrategy(competitionDetails),
+                CompetitionMode.RoundRobin => new RoundRobinMatchupStrategy(competitionDetails),
+                _ => throw new ArgumentException($"Invalid competition mode '{competitionDetails.Mode}'"),
+            };
         }
     }
 }

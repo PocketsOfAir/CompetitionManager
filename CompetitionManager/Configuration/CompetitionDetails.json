@@ -1,5 +1,7 @@
 {
+  "CompetitionName": "(your comp's name)",
   "StartDate": "(format:dd/MM/yyyy HH:mm)",
   "GameLength": "(in minutes)",
-  "Location": "(whatever shows up in the website for your venue)"
+  "Location": "(whatever shows up in the website for your venue)",
+  "Mode": "(either DynamicRounds or RoundRobin)"
 }
