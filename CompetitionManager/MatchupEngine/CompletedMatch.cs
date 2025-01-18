@@ -1,5 +1,4 @@
 ﻿using CompetitionManager.Transport;
-using System.Data;
 
 namespace CompetitionManager.MatchupEngine
 {
@@ -53,14 +52,14 @@ namespace CompetitionManager.MatchupEngine
                 awayScore = 0;
                 exclude = true;
             }
-            else if(float.TryParse(sto.HomeScore, out homeScore) & float.TryParse(sto.AwayScore, out awayScore))
+            else if (float.TryParse(sto.HomeScore, out homeScore) & float.TryParse(sto.AwayScore, out awayScore))
             {
                 valid = true;
             }
 
             if (!valid)
             {
-                throw new DataException($"Invalid serialised game between {sto.HomeTeam} and {sto.AwayTeam}");
+                throw new InvalidDataException($"Invalid serialised game between {sto.HomeTeam} and {sto.AwayTeam}");
             }
 
             return new CompletedMatch(sto.HomeTeam, (int)Math.Floor(homeScore), sto.AwayTeam, (int)Math.Floor(awayScore), exclude);

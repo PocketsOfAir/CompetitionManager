@@ -2,7 +2,6 @@
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
-using System.Reflection;
 using System.Text;
 
 namespace CompetitionManager.Transport
@@ -19,14 +18,12 @@ namespace CompetitionManager.Transport
                 Encoding = Encoding.UTF8
             };
 
-            using (var reader = new StreamReader(teamsCsvPath))
-            using (var csv = new CsvReader(reader, csvConfig))
+            using var reader = new StreamReader(teamsCsvPath);
+            using var csv = new CsvReader(reader, csvConfig);
+            var csvTeams = csv.GetRecords<TeamSto>().ToList();
+            foreach (var team in csvTeams)
             {
-                var csvTeams = csv.GetRecords<TeamSto>().ToList();
-                foreach (var team in csvTeams)
-                {
-                    teams.Add(new Team(team.Name, team.Rating));
-                }
+                teams.Add(new Team(team.Name, team.Rating));
             }
             return teams;
         }
@@ -41,14 +38,12 @@ namespace CompetitionManager.Transport
                 Encoding = Encoding.UTF8
             };
 
-            using (var reader = new StreamReader(teamsCsvPath))
-            using (var csv = new CsvReader(reader, csvConfig))
+            using var reader = new StreamReader(teamsCsvPath);
+            using var csv = new CsvReader(reader, csvConfig);
+            var csvTeams = csv.GetRecords<FieldPreferenceSto>().ToList();
+            foreach (var pref in csvTeams)
             {
-                var csvTeams = csv.GetRecords<FieldPreferenceSto>().ToList();
-                foreach (var pref in csvTeams)
-                {
-                    preferences.Add(new FieldPreference(pref.Team, pref.FieldNumber));
-                }
+                preferences.Add(new FieldPreference(pref.Team, pref.FieldNumber, pref.Location));
             }
             return preferences;
         }
@@ -63,40 +58,48 @@ namespace CompetitionManager.Transport
                 Encoding = Encoding.UTF8
             };
 
-            using (var reader = new StreamReader(csvPath))
-            using (var csv = new CsvReader(reader, csvConfig))
+            using var reader = new StreamReader(csvPath);
+            using var csv = new CsvReader(reader, csvConfig);
+            var csvTeams = csv.GetRecords<CompletedRoundEntrySto>().ToList();
+            var roundStos = csvTeams.GroupBy(r => r.GameDate);
+            var i = 1;
+            foreach (var roundSto in roundStos)
             {
-                var csvTeams = csv.GetRecords<CompletedRoundEntrySto>().ToList();
-                var roundStos = csvTeams.GroupBy(r => r.GameDate);
-                var i = 1;
-                foreach (var roundSto in roundStos)
+                var round = new CompletedRound
                 {
-                    var round = new CompletedRound
-                    {
-                        RatingCalculationRequired = true,
-                        RoundNumber = i,
-                    };
-                    foreach (var matchSto in roundSto)
-                    {
-                        var match = CompletedMatch.CreateFromSto(matchSto);
-                        round.Matches.Add(match);
-                    }
-                    completedRounds.Add(round);
-                    i++;
+                    RatingCalculationRequired = true,
+                    RoundNumber = i,
+                };
+                foreach (var matchSto in roundSto)
+                {
+                    var match = CompletedMatch.CreateFromSto(matchSto);
+                    round.Matches.Add(match);
                 }
+                completedRounds.Add(round);
+                i++;
             }
             return completedRounds;
         }
 
-        private static RoundSto GetRoundAsSto(List<Match> matches, DateTime startDate, int duration, string location)
+        private static RoundSto GetRoundAsSto(List<Match> matches, DateTime startDate, int duration, List<FieldDetails> fields)
         {
+            if (matches.Count > fields.Count)
+            {
+                throw new InvalidDataException($"More matches in round ({matches.Count}) than fields defined in competition details ({fields.Count})");
+            }
+
+            foreach (var field in fields)
+            {
+                field.Allocated = false;
+            }
+
             var round = new RoundSto();
 
             var endDate = startDate.AddMinutes(duration);
 
             var preferences = LoadFieldPreferences();
 
-            var fieldAllocation = new bool[matches.Count + 1];
+            var fieldLookup = new HashSet<FieldDetails>(fields);
 
             foreach (var match in matches)
             {
@@ -113,7 +116,6 @@ namespace CompetitionManager.Transport
                     StartTimeText = startDate.ToString("HH:mm"),
                     EndDateText = endDate.ToString("dd/MM/yyyy"),
                     EndTimeText = endDate.ToString("HH:mm"),
-                    Location = location,
                 };
 
                 var allocated = false;
@@ -121,42 +123,53 @@ namespace CompetitionManager.Transport
                 {
                     if (match.HomeTeam == preference.Team || match.AwayTeam == preference.Team)
                     {
-                        entry.FieldNumber = preference.FieldNumber;
+                        entry.FieldNumber = preference.Field.FieldNumber;
+                        entry.Location = preference.Field.Location;
                         allocated = true;
-                        if (fieldAllocation[entry.FieldNumber] == true)
+                        if (fieldLookup.TryGetValue(preference.Field, out var matchedField))
                         {
-                            foreach (var entryToReallocate in round.Matches)
+                            if (matchedField.Allocated == false)
                             {
-                                if (entryToReallocate.FieldNumber == preference.FieldNumber)
+                                matchedField.Allocated = true;
+                            }
+                            else
+                            {
+                                foreach (var entryToReallocate in round.Matches)
                                 {
-                                    for (var i = 1; i <= fieldAllocation.Length; i++)
+                                    if (entryToReallocate.FieldNumber == preference.Field.FieldNumber && entryToReallocate.Location == preference.Field.Location)
                                     {
-                                        var field = fieldAllocation[i];
-                                        if (field == false)
+                                        foreach (var field in fields)
                                         {
-                                            entryToReallocate.FieldNumber = i;
-                                            fieldAllocation[i] = true;
-                                            break;
+                                            if (field.Allocated == false)
+                                            {
+                                                entryToReallocate.FieldNumber = field.FieldNumber;
+                                                entryToReallocate.Location = field.Location;
+                                                field.Allocated = true;
+                                                break;
+                                            }
                                         }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }
-                        fieldAllocation[entry.FieldNumber] = true;
+                        else
+                        {
+                            throw new InvalidDataException($"Preferred field for team '{preference.Team}' (#{preference.Field.FieldNumber} at {preference.Field.Location}) doesn't exist in configured locations");
+                        }
                         break;
                     }
                 }
 
                 if (!allocated)
                 {
-                    for (var i = 1; i <= fieldAllocation.Length; i++)
+                    foreach (var field in fields)
                     {
-                        var field = fieldAllocation[i];
-                        if (field == false)
+                        if (field.Allocated == false)
                         {
-                            entry.FieldNumber = i;
-                            fieldAllocation[i] = true;
+                            entry.FieldNumber = field.FieldNumber;
+                            entry.Location = field.Location;
+                            field.Allocated = true;
                             break;
                         }
                     }
@@ -183,14 +196,14 @@ namespace CompetitionManager.Transport
             csvOut.WriteRecords(matches);
         }
 
-        public static void ExportRounds(List<List<Match>> rounds, DateTime startDate, int duration, string location, string filename)
+        public static void ExportRounds(List<List<Match>> rounds, DateTime startDate, int duration, List<FieldDetails> fields, string filename)
         {
             var allMatches = new List<RoundEntrySto>();
             for (var i = 0; i < rounds.Count; i++)
             {
                 var round = rounds[i];
                 var roundDate = startDate.AddDays(i * 7);
-                var matches = GetRoundAsSto(round, roundDate, duration, location);
+                var matches = GetRoundAsSto(round, roundDate, duration, fields);
 
                 var allText = new StringBuilder();
                 foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))
@@ -203,7 +216,7 @@ namespace CompetitionManager.Transport
                 }
 
 
-                File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} round {i+1} email.txt"), allText.ToString());
+                File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} round {i + 1} email.txt"), allText.ToString());
 
                 allMatches.AddRange(matches.Matches);
             }
@@ -211,9 +224,9 @@ namespace CompetitionManager.Transport
             WriteMatchesToCSV(allMatches, filename);
         }
 
-        public static void ExportRound(List<Match> round, DateTime startDate, int duration, string location, string filename)
+        public static void ExportRound(List<Match> round, DateTime startDate, int duration, List<FieldDetails> fields, string filename)
         {
-            var matches = GetRoundAsSto(round, startDate, duration, location);
+            var matches = GetRoundAsSto(round, startDate, duration, fields);
 
             var allText = new StringBuilder();
             foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))

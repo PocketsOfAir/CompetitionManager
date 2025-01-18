@@ -28,8 +28,9 @@ namespace CompetitionManager.MatchupEngine.Strategies
             {
                 var nextRound = GenerateRound(i);
                 allMatches.Add(nextRound);
-            }MatchupsMatrix.CheckMissingMatchups();
-            CsvUtils.ExportRounds(allMatches, CompetitionDetails.StartDate, CompetitionDetails.GameLength, CompetitionDetails.Location, CompetitionDetails.CompetitionName);
+            }
+            MatchupsMatrix.CheckMissingMatchups();
+            CsvUtils.ExportRounds(allMatches, CompetitionDetails.StartDate, CompetitionDetails.GameLength, CompetitionDetails.Fields, CompetitionDetails.CompetitionName);
         }
 
         private List<Match> GenerateRound(int roundIndex)

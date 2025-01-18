@@ -9,5 +9,7 @@ namespace CompetitionManager.Transport
         public string Team { get; set; } = string.Empty;
         [Index(1)]
         public int FieldNumber { get; set; } = 0;
+        [Index(2)]
+        public string Location { get; set; } = string.Empty;
     }
 }

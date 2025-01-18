@@ -1,8 +1,8 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class FieldPreference(string team, int fieldNumber)
+    internal sealed class FieldPreference(string team, int fieldNumber, string location)
     {
         public string Team { get; set; } = team;
-        public int FieldNumber { get; set; } = fieldNumber;
+        public FieldDetails Field { get; set; } = new FieldDetails(location, fieldNumber);
     }
 }

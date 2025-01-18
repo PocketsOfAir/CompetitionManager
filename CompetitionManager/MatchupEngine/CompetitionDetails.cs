@@ -8,11 +8,11 @@ namespace CompetitionManager.MatchupEngine
 
         public int GameLength { get; set; }
 
-        public string Location { get; set; } = string.Empty;
-
         public string CompetitionName { get; set; } = string.Empty;
 
         public CompetitionMode Mode { get; set; }
+
+        public List<FieldDetails> Fields { get; set; } = [];
 
         public static CompetitionDetails CreateFromSto(CompetitionDetailsSto details)
         {
@@ -24,16 +24,27 @@ namespace CompetitionManager.MatchupEngine
                 var output = new CompetitionDetails
                 {
                     CompetitionName = details.CompetitionName,
-                    Location = details.Location,
                     StartDate = startDate,
                     GameLength = gameLength,
                     Mode = mode,
                 };
+                output.LoadFieldsFromLocations(details.Locations);
                 return output;
             }
             else
             {
                 throw new InvalidDataException("Invalid Competition Details");
+            }
+        }
+
+        private void LoadFieldsFromLocations(List<LocationSto> locations)
+        {
+            foreach (var location in locations)
+            {
+                foreach (var field in location.Fields)
+                {
+                    Fields.Add(new FieldDetails(location.Name, field));
+                }
             }
         }
     }
