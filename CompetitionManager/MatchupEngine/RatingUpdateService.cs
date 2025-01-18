@@ -6,7 +6,7 @@ namespace CompetitionManager.MatchupEngine
     {
         private const int SeedingDecayRounds = 5;
         private Dictionary<string, Team> Teams { get; set; } = [];
-        private bool SeedingDecay { get; } = true;
+        private bool SeedingDecay { get; } = false;
         public RatingUpdateService(List<Team> teams)
         {
             foreach (var team in teams)
