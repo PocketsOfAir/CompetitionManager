@@ -205,18 +205,7 @@ namespace CompetitionManager.Transport
                 var roundDate = startDate.AddDays(i * 7);
                 var matches = GetRoundAsSto(round, roundDate, duration, fields);
 
-                var allText = new StringBuilder();
-                foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))
-                {
-                    allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
-                }
-                if (matches.ByeTeam != string.Empty)
-                {
-                    allText.AppendLine($"Bye: {matches.ByeTeam}");
-                }
-
-
-                File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} round {i + 1} email.txt"), allText.ToString());
+                WriteMatchesToText(matches, $"{filename} round {i + 1} email.txt");
 
                 allMatches.AddRange(matches.Matches);
             }
@@ -228,19 +217,29 @@ namespace CompetitionManager.Transport
         {
             var matches = GetRoundAsSto(round, startDate, duration, fields);
 
+            WriteMatchesToText(matches, $"{filename} email.txt");
+
+            WriteMatchesToCSV(matches.Matches, filename);
+        }
+
+        private static void WriteMatchesToText(RoundSto matches, string filename)
+        {
+
             var allText = new StringBuilder();
-            foreach (var entry in matches.Matches.OrderBy(r => r.FieldNumber))
+            foreach (var location in matches.Matches.GroupBy(r => r.Location))
             {
-                allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                allText.AppendLine($"{location.Key}:");
+                foreach (var entry in location.OrderBy(r => r.FieldNumber))
+                {
+                    allText.AppendLine($"\tField {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                }
             }
             if (matches.ByeTeam != string.Empty)
             {
-                allText.AppendLine($"Bye: {matches.ByeTeam}");
+                allText.AppendLine($"\tBye: {matches.ByeTeam}");
             }
 
-            File.WriteAllText(PathUtils.GetOutputFilePath($"{filename} email.txt"), allText.ToString());
-
-            WriteMatchesToCSV(matches.Matches, filename);
+            File.WriteAllText(PathUtils.GetOutputFilePath(filename), allText.ToString());
         }
     }
 }
