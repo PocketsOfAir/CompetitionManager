@@ -30,22 +30,21 @@ namespace CompetitionManager.MatchupEngine.Strategies
         public void ExportMatches()
         {
             var stopwatch = new Stopwatch();
-            LoggingService.Instance.Log("Generating costs and preventing rematches");
 
             stopwatch.Start();
 
             var ratingUpdater = new RatingUpdateService(Teams);
             ratingUpdater.UpdateRatingsForRounds(PreviousRounds);
 
-            Console.WriteLine("");
-            Console.WriteLine("Calculating Ratings");
+            LoggingService.Instance.Log("");
+            LoggingService.Instance.Log("Calculating Ratings");
             foreach (var team in Teams.OrderByDescending(t => t.Rating))
             {
-                Console.WriteLine($"    Team: {team.Name}, Rating: {team.Rating}");
+                LoggingService.Instance.Log($"    Team: {team.Name}, Rating: {team.Rating}");
             }
-            Console.WriteLine("");
+            LoggingService.Instance.Log("");
 
-            Console.WriteLine("Generating costs and preventing rematches");
+            LoggingService.Instance.Log("Generating costs and preventing rematches");
             Costs.GenerateCosts(Teams);
             Costs.PreventRematches(PreviousRounds, CurrentRound, ReplayThreshold);
 
