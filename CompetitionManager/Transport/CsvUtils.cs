@@ -224,14 +224,24 @@ namespace CompetitionManager.Transport
 
         private static void WriteMatchesToText(RoundSto matches, string filename)
         {
-
             var allText = new StringBuilder();
-            foreach (var location in matches.Matches.GroupBy(r => r.Location))
+            var groupedLocations = matches.Matches.GroupBy(r => r.Location);
+            foreach (var location in groupedLocations)
             {
-                allText.AppendLine($"{location.Key}:");
-                foreach (var entry in location.OrderBy(r => r.FieldNumber))
+                if (groupedLocations.Count() > 1)
                 {
-                    allText.AppendLine($"\tField {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                    allText.AppendLine($"{location.Key}:");
+                    foreach (var entry in location.OrderBy(r => r.FieldNumber))
+                    {
+                        allText.AppendLine($"\tField {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                    }
+                }
+                else
+                {
+                    foreach (var entry in location.OrderBy(r => r.FieldNumber))
+                    {
+                        allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                    }
                 }
             }
             if (matches.ByeTeam != string.Empty)
