@@ -30,7 +30,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
                 allMatches.Add(nextRound);
             }
             MatchupsMatrix.CheckMissingMatchups();
-            CsvUtils.ExportRounds(allMatches, CompetitionDetails.StartDate, CompetitionDetails.GameLength, CompetitionDetails.Fields, CompetitionDetails.CompetitionName);
+            CsvUtils.ExportRounds(allMatches, CompetitionDetails.StartDate, CompetitionDetails.Timeslots, CompetitionDetails.GameLength, CompetitionDetails.Fields, CompetitionDetails.CompetitionName);
         }
 
         private List<Match> GenerateRound(int roundIndex)

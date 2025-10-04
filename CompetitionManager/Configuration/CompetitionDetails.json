@@ -1,6 +1,10 @@
 {
   "CompetitionName": "(your comp's name)",
-  "StartDate": "(format:dd/MM/yyyy HH:mm)",
+  "StartDate": "(format:dd/MM/yyyy HH:mm if one timeslot, or dd/MM/yyyy if multiple)",
+  "Timeslots": [
+    "(format:dd/MM) optional field - only used for multiple games per week",
+    "(format:dd/MM)"
+  ],
   "GameLength": "(in minutes)",
   "Mode": "(either DynamicRounds or RoundRobin)",
   "Locations": [

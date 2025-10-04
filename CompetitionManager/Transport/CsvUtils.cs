@@ -93,7 +93,10 @@ namespace CompetitionManager.Transport
                 field.Allocated = false;
             }
 
-            var round = new RoundSto();
+            var round = new RoundSto
+            {
+                StartTime = startDate.ToString("t")
+            };
 
             var endDate = startDate.AddMinutes(duration);
 
@@ -196,20 +199,30 @@ namespace CompetitionManager.Transport
             csvOut.WriteRecords(matches);
         }
 
-        public static void ExportRounds(List<List<Match>> rounds, DateTime startDate, int duration, List<FieldDetails> fields, string filename)
+        public static void ExportRounds(List<List<Match>> rounds, DateOnly startDate, List<TimeOnly> timeslots, int duration, List<FieldDetails> fields, string filename)
         {
             var allMatches = new List<RoundEntrySto>();
-            for (var i = 0; i < rounds.Count; i++)
+            var weekIndex = 0;
+            var timeslotIndex = 0;
+            for (var roundIndex = 0; roundIndex < rounds.Count; roundIndex++)
             {
-                var round = rounds[i];
-                var roundDate = startDate.AddDays(i * 7);
-                var matches = GetRoundAsSto(round, roundDate, duration, fields);
-
-                WriteMatchesToText(matches, $"{filename} round {i + 1} email.txt");
+                var timeslot = timeslots[timeslotIndex];
+                var round = rounds[roundIndex];
+                var roundDate = startDate.AddDays(weekIndex * 7);
+                var roundDateTime = new DateTime(roundDate, timeslot);
+                var matches = GetRoundAsSto(round, roundDateTime, duration, fields);
 
                 allMatches.AddRange(matches.Matches);
+
+                timeslotIndex++;
+                if (timeslotIndex == timeslots.Count)
+                {
+                    timeslotIndex = 0;
+                    weekIndex++;
+                }
             }
 
+            WriteMatchesToText(weeklyMatches, $"{filename} week {weekIndex} email.txt");
             WriteMatchesToCSV(allMatches, filename);
         }
 
@@ -217,36 +230,72 @@ namespace CompetitionManager.Transport
         {
             var matches = GetRoundAsSto(round, startDate, duration, fields);
 
-            WriteMatchesToText(matches, $"{filename} email.txt");
+            WriteMatchesToText([matches], $"{filename} email.txt");
 
             WriteMatchesToCSV(matches.Matches, filename);
         }
 
-        private static void WriteMatchesToText(RoundSto matches, string filename)
+        //private static void WriteMatchesToText(RoundSto matches, string filename)
+        //{
+        //    var allText = new StringBuilder();
+        //    var groupedLocations = matches.Matches.GroupBy(r => r.Location);
+        //    foreach (var location in groupedLocations)
+        //    {
+        //        if (groupedLocations.Count() > 1)
+        //        {
+        //            allText.AppendLine($"{location.Key}:");
+        //            foreach (var entry in location.OrderBy(r => r.FieldNumber))
+        //            {
+        //                allText.AppendLine($"\tField {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            foreach (var entry in location.OrderBy(r => r.FieldNumber))
+        //            {
+        //                allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+        //            }
+        //        }
+        //    }
+        //    if (matches.ByeTeam != string.Empty)
+        //    {
+        //        allText.AppendLine($"\tBye: {matches.ByeTeam}");
+        //    }
+
+        //    File.WriteAllText(PathUtils.GetOutputFilePath(filename), allText.ToString());
+        //}
+
+        private static void WriteMatchesToText(List<RoundSto> rounds, string filename)
         {
             var allText = new StringBuilder();
-            var groupedLocations = matches.Matches.GroupBy(r => r.Location);
-            foreach (var location in groupedLocations)
+            for (var i = 0; i < rounds.Count; i++)
             {
-                if (groupedLocations.Count() > 1)
+                var leadingSpace = "";
+                var matches = rounds[i];
+                if (rounds.Count > 1)
                 {
-                    allText.AppendLine($"{location.Key}:");
+                    allText.AppendLine($"Game {i + 1} ({matches.StartTime}):");
+                    leadingSpace += "\t";
+                }
+
+                var groupedLocations = matches.Matches.GroupBy(r => r.Location);
+                foreach (var location in groupedLocations)
+                {
+                    if (groupedLocations.Count() > 1)
+                    {
+                        allText.AppendLine($"{leadingSpace}{location.Key}:");
+                        leadingSpace += "\t";
+                    }
+
                     foreach (var entry in location.OrderBy(r => r.FieldNumber))
                     {
-                        allText.AppendLine($"\tField {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
+                        allText.AppendLine($"{leadingSpace}Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
                     }
                 }
-                else
+                if (matches.ByeTeam != string.Empty)
                 {
-                    foreach (var entry in location.OrderBy(r => r.FieldNumber))
-                    {
-                        allText.AppendLine($"Field {entry.FieldNumber}: {entry.HomeTeam} vs. {entry.AwayTeam}");
-                    }
+                    allText.AppendLine($"{leadingSpace}Bye: {matches.ByeTeam}");
                 }
-            }
-            if (matches.ByeTeam != string.Empty)
-            {
-                allText.AppendLine($"\tBye: {matches.ByeTeam}");
             }
 
             File.WriteAllText(PathUtils.GetOutputFilePath(filename), allText.ToString());

@@ -76,7 +76,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
                 output.Add(match);
             }
 
-            var competitionStartDate = CompetitionDetails.StartDate;
+            var competitionStartDate = CompetitionDetails.StartDateTime;
             var roundDate = competitionStartDate.AddDays(PreviousRounds.Count * 7);
             CsvUtils.ExportRound(output, roundDate, CompetitionDetails.GameLength, CompetitionDetails.Fields, $"{CompetitionDetails.CompetitionName} Round {PreviousRounds.Count + 1}");
         }

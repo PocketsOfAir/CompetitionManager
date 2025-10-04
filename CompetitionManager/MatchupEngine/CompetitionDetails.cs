@@ -4,7 +4,11 @@ namespace CompetitionManager.MatchupEngine
 {
     internal sealed class CompetitionDetails
     {
-        public DateTime StartDate { get; set; }
+        public DateTime StartDateTime { get; set; }
+
+        public DateOnly StartDate { get; set; }
+
+        public List<TimeOnly> Timeslots { get; set; } = [];
 
         public int GameLength { get; set; }
 
@@ -17,24 +21,46 @@ namespace CompetitionManager.MatchupEngine
         public static CompetitionDetails CreateFromSto(CompetitionDetailsSto details)
         {
             var valid = int.TryParse(details.GameLength, out var gameLength);
-            valid &= DateTime.TryParse(details.StartDate, out var startDate);
             valid &= Enum.TryParse<CompetitionMode>(details.Mode, out var mode);
-            if (valid)
-            {
-                var output = new CompetitionDetails
-                {
-                    CompetitionName = details.CompetitionName,
-                    StartDate = startDate,
-                    GameLength = gameLength,
-                    Mode = mode,
-                };
-                output.LoadFieldsFromLocations(details.Locations);
-                return output;
-            }
-            else
+
+            if (!valid)
             {
                 throw new InvalidDataException("Invalid Competition Details");
             }
+
+            var output = new CompetitionDetails
+            {
+                CompetitionName = details.CompetitionName,
+                GameLength = gameLength,
+                Mode = mode,
+            };
+            output.LoadFieldsFromLocations(details.Locations);
+
+            if (details.Timeslots.Count == 0)
+            {
+                valid &= DateTime.TryParse(details.StartDate, out var startDate);
+                output.StartDateTime = startDate;
+                output.StartDate = DateOnly.FromDateTime(startDate);
+                output.Timeslots.Add(TimeOnly.FromDateTime(startDate));
+            }
+            else
+            {
+                valid &= DateTime.TryParse(details.StartDate, out var startDate);
+                output.StartDate = DateOnly.FromDateTime(startDate);
+                foreach (var timeslot in details.Timeslots)
+                {
+                    valid &= TimeOnly.TryParse(timeslot, out var startTime);
+                    output.Timeslots.Add(startTime);
+                }
+                output.StartDateTime = new DateTime(output.StartDate, output.Timeslots[0]);
+            }
+
+            if (!valid)
+            {
+                throw new InvalidDataException("Invalid Competition Details");
+            }
+
+            return output;
         }
 
         private void LoadFieldsFromLocations(List<LocationSto> locations)
