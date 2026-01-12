@@ -17,14 +17,15 @@ namespace CompetitionManager.MatchupEngine.Strategies
         {
             Teams = CsvUtils.LoadTeams();
             PreviousRounds = CsvUtils.LoadCompletedRounds();
-            Costs = new CostsMatrix(Teams);
-            CurrentRound = PreviousRounds.Count + 1;
-            CompetitionDetails = competitionDetails;
 
             if (Teams.Count % 2 != 0)
             {
                 Teams.Add(Team.CreateBye());
             }
+
+            Costs = new CostsMatrix(Teams);
+            CurrentRound = PreviousRounds.Count + 1;
+            CompetitionDetails = competitionDetails;
         }
 
         public void ExportMatches()

@@ -31,8 +31,14 @@
                     var cost = Math.Abs(team1.Rating - team2.Rating);
                     if (team1.IsBye || team2.IsBye)
                     {
-                        //all teams are equally valid for byes
-                        cost = 0;
+                        if (team1.PreventByes || team2.PreventByes)
+                        {
+                            cost = int.MaxValue;
+                        }
+                        else
+                        {
+                            cost = 0;
+                        }
                     }
                     SetCost(team1.Name, team2.Name, cost);
                 }

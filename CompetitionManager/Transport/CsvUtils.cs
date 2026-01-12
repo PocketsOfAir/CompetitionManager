@@ -21,9 +21,17 @@ namespace CompetitionManager.Transport
             using var reader = new StreamReader(teamsCsvPath);
             using var csv = new CsvReader(reader, csvConfig);
             var csvTeams = csv.GetRecords<TeamSto>().ToList();
-            foreach (var team in csvTeams)
+
+            var adminTeams = new HashSet<string>(LoadFieldPreferences().Select(t => t.Team));
+
+            foreach (var csvTeam in csvTeams)
             {
-                teams.Add(new Team(team.Name, team.Rating));
+                var team = new Team(csvTeam.Name, csvTeam.Rating);
+                if (adminTeams.Contains(team.Name))
+                {
+                    team.PreventByes = true;
+                }
+                teams.Add(team);
             }
             return teams;
         }
