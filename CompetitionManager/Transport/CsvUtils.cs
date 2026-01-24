@@ -254,7 +254,7 @@ namespace CompetitionManager.Transport
             }
             if (matches.ByeTeam != string.Empty)
             {
-                allText.AppendLine($"\tBye: {matches.ByeTeam}");
+                allText.AppendLine($"Bye: {matches.ByeTeam}");
             }
 
             File.WriteAllText(PathUtils.GetOutputFilePath(filename), allText.ToString());
