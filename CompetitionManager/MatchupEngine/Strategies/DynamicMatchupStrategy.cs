@@ -46,7 +46,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
             LoggingService.Instance.Log("");
 
             LoggingService.Instance.Log("Generating costs and preventing rematches");
-            Costs.GenerateCosts(Teams);
+            Costs.GenerateCosts(Teams, PreviousRounds);
             Costs.PreventRematches(PreviousRounds, CurrentRound, ReplayThreshold);
 
             stopwatch.Stop();

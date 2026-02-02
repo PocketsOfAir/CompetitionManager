@@ -20,8 +20,44 @@
             }
         }
 
-        public void GenerateCosts(List<Team> teams)
+        public void GenerateCosts(List<Team> teams, List<CompletedRound> previousRounds)
         {
+            var hasBye = false;
+            var matchCount = new Dictionary<string, int>();
+            foreach (var team in teams)
+            {
+                if (team.IsBye)
+                {
+                    hasBye = true;
+                }
+                matchCount[team.Name] = 0;
+            }
+
+            var maxGamesPlayed = 0;
+
+            if (hasBye)
+            {
+                foreach (var round in previousRounds)
+                {
+                    foreach (var match in round.Matches)
+                    {
+                        matchCount[match.HomeTeam]++;
+                        matchCount[match.AwayTeam]++;
+                    }
+                }
+                maxGamesPlayed = matchCount.Select(m => m.Value).Max();
+            }
+
+
+
+            foreach (var count in matchCount)
+            {
+                if (count.Value < maxGamesPlayed)
+                {
+
+                }
+            }
+
             for (int i = 0; i < teams.Count; i++)
             {
                 var team1 = teams[i];
@@ -32,6 +68,14 @@
                     if (team1.IsBye || team2.IsBye)
                     {
                         if (team1.PreventByes || team2.PreventByes)
+                        {
+                            cost = int.MaxValue;
+                        }
+                        else if (team1.IsBye && matchCount[team2.Name] < maxGamesPlayed)
+                        {
+                            cost = int.MaxValue;
+                        }
+                        else if (team2.IsBye && matchCount[team1.Name] < maxGamesPlayed)
                         {
                             cost = int.MaxValue;
                         }
