@@ -193,28 +193,30 @@ namespace CompetitionManager.Transport
             csvOut.WriteRecords(matches);
         }
 
-        public static void ExportRounds(List<List<Match>> rounds, DateTime startDate, int duration, List<FieldDetails> fields, string filename)
+        public static void ExportRounds(List<List<Match>> rounds, CompetitionDetails details)
         {
             var allMatches = new List<RoundEntrySto>();
             for (var i = 0; i < rounds.Count; i++)
             {
                 var round = rounds[i];
-                var roundDate = startDate.AddDays(i * 7);
-                var matches = GetRoundAsSto(round, roundDate, duration, fields);
+                var roundDate = details.StartDate.AddDays(i * 7);
+                var matches = GetRoundAsSto(round, roundDate, details.GameLength, details.Fields);
 
-                WriteMatchesToText(matches, $"{filename} round {i + 1} email.txt");
+                WriteMatchesToText(matches, $"{details.CompetitionName} round {i + details.StartingRound} email");
 
                 allMatches.AddRange(matches.Matches);
             }
 
-            WriteMatchesToCSV(allMatches, filename);
+            var csvFilename = $"{details.CompetitionName} rounds {details.StartingRound} to {details.StartingRound + rounds.Count - 1}";
+
+            WriteMatchesToCSV(allMatches, csvFilename);
         }
 
         public static void ExportRound(List<Match> round, DateTime startDate, int duration, List<FieldDetails> fields, string filename)
         {
             var matches = GetRoundAsSto(round, startDate, duration, fields);
 
-            WriteMatchesToText(matches, $"{filename} email.txt");
+            WriteMatchesToText(matches, $"{filename} email");
 
             WriteMatchesToCSV(matches.Matches, filename);
         }
@@ -246,7 +248,7 @@ namespace CompetitionManager.Transport
                 allText.AppendLine($"Bye: {matches.ByeTeam}");
             }
 
-            File.WriteAllText(PathUtils.GetOutputFilePath(filename), allText.ToString());
+            File.WriteAllText(PathUtils.GetOutputFilePath($"{filename}.txt"), allText.ToString());
         }
     }
 }

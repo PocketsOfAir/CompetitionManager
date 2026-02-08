@@ -7,6 +7,7 @@ namespace CompetitionManager.MatchupEngine
         public DateTime StartDate { get; set; }
 
         public int GameLength { get; set; }
+        public int StartingRound { get; set; }
 
         public string CompetitionName { get; set; } = string.Empty;
 
@@ -16,17 +17,23 @@ namespace CompetitionManager.MatchupEngine
 
         public static CompetitionDetails CreateFromSto(CompetitionDetailsSto details)
         {
-            var valid = int.TryParse(details.GameLength, out var gameLength);
-            valid &= DateTime.TryParse(details.StartDate, out var startDate);
+            var valid = DateTime.TryParse(details.StartDate, out var startDate);
             valid &= Enum.TryParse<CompetitionMode>(details.Mode, out var mode);
+            var startingRound = details.StartingRound ?? 1;
+            if (startingRound > 1)
+            {
+                startDate = startDate.AddDays(7 * (startingRound - 1));
+            }
+
             if (valid)
             {
                 var output = new CompetitionDetails
                 {
                     CompetitionName = details.CompetitionName,
                     StartDate = startDate,
-                    GameLength = gameLength,
+                    GameLength = details.GameLength,
                     Mode = mode,
+                    StartingRound = startingRound,
                 };
                 output.LoadFieldsFromLocations(details.Locations);
                 return output;
