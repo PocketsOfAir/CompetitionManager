@@ -2,33 +2,37 @@
 {
     internal sealed class CostsMatrix
     {
-        private Dictionary<string, int> TeamIdLookup { get; set; } = [];
+        private List<Team> Teams { get; }
+        private Dictionary<string, Team> TeamLookup { get; } = [];
 
-        private int[,] MatchupCosts { get; set; }
+        private List<CompletedRound> PreviousRounds { get; }
 
-        private int TeamCount { get; set; } = 0;
+        private int[,] MatchupCosts { get; }
 
-        public CostsMatrix(List<Team> teams)
+        public CostsMatrix(List<Team> teams, List<CompletedRound> previousRounds)
         {
-            TeamCount = teams.Count;
-            MatchupCosts = new int[TeamCount, TeamCount];
+            Teams = teams;
+            PreviousRounds = previousRounds;
+            MatchupCosts = new int[Teams.Count, Teams.Count];
 
-            for (int i = 0; i < TeamCount; i++)
+            for (int i = 0; i < Teams.Count; i++)
             {
-                TeamIdLookup[teams[i].Name] = i;
+                TeamLookup[teams[i].Name] = teams[i];
                 teams[i].MatrixIndex = i;
             }
         }
 
-        public void GenerateCosts(List<Team> teams, List<CompletedRound> previousRounds)
+        public void GenerateCosts()
         {
             var hasBye = false;
+            Team? byeTeam = null;
             var matchCount = new Dictionary<string, int>();
-            foreach (var team in teams)
+            foreach (var team in TeamLookup.Values)
             {
                 if (team.IsBye)
                 {
                     hasBye = true;
+                    byeTeam = team;
                 }
                 matchCount[team.Name] = 0;
             }
@@ -37,61 +41,59 @@
 
             if (hasBye)
             {
-                foreach (var round in previousRounds)
+                foreach (var round in PreviousRounds)
                 {
                     foreach (var match in round.Matches)
                     {
-                        matchCount[match.HomeTeam]++;
-                        matchCount[match.AwayTeam]++;
+                        TeamLookup[match.HomeTeam].MatchesPlayed++;
+                        TeamLookup[match.AwayTeam].MatchesPlayed++;
                     }
                 }
                 maxGamesPlayed = matchCount.Select(m => m.Value).Max();
             }
 
+            List<Team> byeCandidates = [];
 
-
-            foreach (var count in matchCount)
+            for (int i = 0; i < Teams.Count; i++)
             {
-                if (count.Value < maxGamesPlayed)
+                var team1 = Teams[i];
+                for (int j = i + 1; j < Teams.Count; j++)
                 {
-
-                }
-            }
-
-            for (int i = 0; i < teams.Count; i++)
-            {
-                var team1 = teams[i];
-                for (int j = i + 1; j < teams.Count; j++)
-                {
-                    var team2 = teams[j];
+                    var team2 = Teams[j];
                     var cost = Math.Abs(team1.Rating - team2.Rating);
                     if (team1.IsBye || team2.IsBye)
                     {
+                        cost = int.MaxValue;
                         if (team1.PreventByes || team2.PreventByes)
                         {
-                            cost = int.MaxValue;
                         }
-                        else if (team1.IsBye && matchCount[team2.Name] < maxGamesPlayed)
+                        else if (team1.IsBye && matchCount[team2.Name] == maxGamesPlayed)
                         {
-                            cost = int.MaxValue;
+                            byeCandidates.Add(team2);
                         }
-                        else if (team2.IsBye && matchCount[team1.Name] < maxGamesPlayed)
+                        else if (team2.IsBye && matchCount[team1.Name] == maxGamesPlayed)
                         {
-                            cost = int.MaxValue;
-                        }
-                        else
-                        {
-                            cost = 0;
+                            byeCandidates.Add(team1);
                         }
                     }
                     SetCost(team1.Name, team2.Name, cost);
                 }
             }
+
+            if (byeTeam != null && byeCandidates.Count > 0)
+            {
+                Console.WriteLine($"The following teams are candidates for the bye:\n\t{string.Join("\n\t", byeCandidates.Select(b => b.Name))}");
+                var byeIndex = new Random().Next(byeCandidates.Count);
+                var teamReceivingBye = byeCandidates[byeIndex];
+                SetCost(teamReceivingBye.Name, byeTeam.Name, 0);
+                Console.WriteLine($"Team '{teamReceivingBye.Name}' was allocated the bye.");
+            }
         }
 
-        public void PreventRematches(List<CompletedRound> previousRounds, int currentRound, int replayThreshold)
+        public void PreventRematches(int replayThreshold)
         {
-            foreach (var round in previousRounds)
+            var currentRound = PreviousRounds.Count + 1;
+            foreach (var round in PreviousRounds)
             {
                 var roundsSinceMatch = currentRound - round.RoundNumber;
                 if (roundsSinceMatch < replayThreshold)
@@ -111,8 +113,8 @@
 
         private void SetCost(string team1, string team2, int cost)
         {
-            var team1Index = TeamIdLookup[team1];
-            var team2Index = TeamIdLookup[team2];
+            var team1Index = TeamLookup[team1].MatrixIndex;
+            var team2Index = TeamLookup[team2].MatrixIndex;
             //set both t1:t2 and t2:t1 so that retrieval is order-agnostic
             MatchupCosts[team1Index, team2Index] = cost;
             MatchupCosts[team2Index, team1Index] = cost;

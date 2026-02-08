@@ -6,12 +6,12 @@ namespace CompetitionManager.MatchupEngine.Strategies
 {
     internal sealed class DynamicMatchupStrategy : IMatchupStrategy
     {
-        public int ReplayThreshold { get; private set; } = int.MaxValue;
-        public int CurrentRound { get; private set; } = 1;
-        private CostsMatrix Costs { get; set; }
-        private List<Team> Teams { get; set; }
-        private List<CompletedRound> PreviousRounds { get; set; }
-        private CompetitionDetails CompetitionDetails { get; set; }
+        private int ReplayThreshold { get; } = int.MaxValue;
+        private int CurrentRound { get; } = 1;
+        private CostsMatrix Costs { get; }
+        private List<Team> Teams { get; }
+        private List<CompletedRound> PreviousRounds { get; }
+        private CompetitionDetails CompetitionDetails { get; }
 
         public DynamicMatchupStrategy(CompetitionDetails competitionDetails)
         {
@@ -23,7 +23,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
                 Teams.Add(Team.CreateBye());
             }
 
-            Costs = new CostsMatrix(Teams);
+            Costs = new CostsMatrix(Teams, PreviousRounds);
             CurrentRound = PreviousRounds.Count + 1;
             CompetitionDetails = competitionDetails;
         }
@@ -46,8 +46,8 @@ namespace CompetitionManager.MatchupEngine.Strategies
             LoggingService.Instance.Log("");
 
             LoggingService.Instance.Log("Generating costs and preventing rematches");
-            Costs.GenerateCosts(Teams, PreviousRounds);
-            Costs.PreventRematches(PreviousRounds, CurrentRound, ReplayThreshold);
+            Costs.GenerateCosts();
+            Costs.PreventRematches(ReplayThreshold);
 
             stopwatch.Stop();
             LoggingService.Instance.Log($"Costs generated after {stopwatch.ElapsedMilliseconds}ms. Generating rounds");
