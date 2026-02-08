@@ -19,13 +19,19 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
         public DynamicMatchupStrategy(CompetitionDetails competitionDetails)
         {
-            Teams = CsvUtils.LoadTeams();
+            var teams = CsvUtils.LoadTeams();
             PreviousRounds = CsvUtils.LoadCompletedRounds();
 
-            if (Teams.Count % 2 != 0)
+            var ratingUpdater = new RatingUpdateService(teams);
+            ratingUpdater.UpdateRatingsForRounds(PreviousRounds);
+
+            if (teams.Count % 2 != 0)
             {
-                Teams.Add(Team.CreateBye());
+                teams.Add(Team.CreateBye());
             }
+
+            var orderedTeams = teams.OrderByDescending(t => t.Rating);
+            Teams = [.. orderedTeams];
 
             CurrentRound = PreviousRounds.Count + 1;
             CompetitionDetails = competitionDetails;
@@ -49,14 +55,14 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
             stopwatch.Start();
 
-            var ratingUpdater = new RatingUpdateService(Teams);
-            ratingUpdater.UpdateRatingsForRounds(PreviousRounds);
-
             LoggingService.Instance.Log("");
-            LoggingService.Instance.Log("Calculating Ratings");
-            foreach (var team in Teams.OrderByDescending(t => t.Rating))
+            LoggingService.Instance.Log("Current Ratings:");
+            foreach (var team in Teams)
             {
-                LoggingService.Instance.Log($"\tTeam: {team.Name}, Rating: {team.Rating}");
+                if (team.IsBye == false)
+                {
+                    LoggingService.Instance.Log($"\tTeam: {team.Name}, Rating: {team.Rating}");
+                }
             }
             LoggingService.Instance.Log("");
 
@@ -99,7 +105,6 @@ namespace CompetitionManager.MatchupEngine.Strategies
         {
             var hasBye = false;
             Team? byeTeam = null;
-            var matchCount = new Dictionary<string, int>();
             foreach (var team in TeamLookup.Values)
             {
                 if (team.IsBye)
@@ -107,7 +112,6 @@ namespace CompetitionManager.MatchupEngine.Strategies
                     hasBye = true;
                     byeTeam = team;
                 }
-                matchCount[team.Name] = 0;
             }
 
             var maxGamesPlayed = 0;
@@ -122,7 +126,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
                         TeamLookup[match.AwayTeam].MatchesPlayed++;
                     }
                 }
-                maxGamesPlayed = matchCount.Select(m => m.Value).Max();
+                maxGamesPlayed = TeamLookup.Values.Select(t => t.MatchesPlayed).Max();
             }
 
             List<Team> byeCandidates = [];
@@ -140,11 +144,11 @@ namespace CompetitionManager.MatchupEngine.Strategies
                         if (team1.PreventByes || team2.PreventByes)
                         {
                         }
-                        else if (team1.IsBye && matchCount[team2.Name] == maxGamesPlayed)
+                        else if (team1.IsBye && TeamLookup[team2.Name].MatchesPlayed == maxGamesPlayed)
                         {
                             byeCandidates.Add(team2);
                         }
-                        else if (team2.IsBye && matchCount[team1.Name] == maxGamesPlayed)
+                        else if (team2.IsBye && TeamLookup[team1.Name].MatchesPlayed == maxGamesPlayed)
                         {
                             byeCandidates.Add(team1);
                         }
