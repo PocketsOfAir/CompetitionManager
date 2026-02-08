@@ -109,6 +109,8 @@ namespace CompetitionManager.Transport
 
             var fieldLookup = new HashSet<FieldDetails>(fields);
 
+            var unallocatedMatches = new List<RoundEntrySto>();
+
             foreach (var match in matches)
             {
                 if (match.IsBye)
@@ -136,30 +138,7 @@ namespace CompetitionManager.Transport
                         allocated = true;
                         if (fieldLookup.TryGetValue(preference.Field, out var matchedField))
                         {
-                            if (matchedField.Allocated == false)
-                            {
-                                matchedField.Allocated = true;
-                            }
-                            else
-                            {
-                                foreach (var entryToReallocate in round.Matches)
-                                {
-                                    if (entryToReallocate.FieldNumber == preference.Field.FieldNumber && entryToReallocate.Location == preference.Field.Location)
-                                    {
-                                        foreach (var field in fields)
-                                        {
-                                            if (field.Allocated == false)
-                                            {
-                                                entryToReallocate.FieldNumber = field.FieldNumber;
-                                                entryToReallocate.Location = field.Location;
-                                                field.Allocated = true;
-                                                break;
-                                            }
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
+                            matchedField.Allocated = true;
                         }
                         else
                         {
@@ -171,19 +150,29 @@ namespace CompetitionManager.Transport
 
                 if (!allocated)
                 {
-                    foreach (var field in fields)
-                    {
-                        if (field.Allocated == false)
-                        {
-                            entry.FieldNumber = field.FieldNumber;
-                            entry.Location = field.Location;
-                            field.Allocated = true;
-                            break;
-                        }
-                    }
+                    unallocatedMatches.Add(entry);
                 }
 
                 round.Matches.Add(entry);
+            }
+
+            var rng = new Random();
+
+            foreach (var field in fields)
+            {
+                if (unallocatedMatches.Count == 0)
+                {
+                    break;
+                }
+                if (field.Allocated)
+                {
+                    continue;
+                }
+                var matchIndex = rng.Next(unallocatedMatches.Count);
+                var entry = unallocatedMatches[matchIndex];
+                entry.FieldNumber = field.FieldNumber;
+                entry.Location = field.Location;
+                unallocatedMatches.RemoveAt(matchIndex);
             }
 
             return round;
