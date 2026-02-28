@@ -3,7 +3,7 @@
 namespace CompetitionManager.Transport
 {
     [Delimiter(",")]
-    internal sealed class FieldPreferenceSto
+    public sealed class FieldPreferenceSto
     {
         [Index(0)]
         public string Team { get; set; } = string.Empty;

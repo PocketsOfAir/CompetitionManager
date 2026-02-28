@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.Transport
 {
-    internal sealed class CompetitionDetailsSto
+    public sealed class CompetitionDetailsSto
     {
         public string CompetitionName { get; set; } = string.Empty;
         public string StartDate { get; set; } = string.Empty;
@@ -8,5 +8,7 @@
         public List<LocationSto> Locations { get; set; } = [];
         public string Mode { get; set; } = string.Empty;
         public int? StartingRound { get; set; }
+
+        public List<StaticMatchSto> StaticMatches { get; set; } = [];
     }
 }

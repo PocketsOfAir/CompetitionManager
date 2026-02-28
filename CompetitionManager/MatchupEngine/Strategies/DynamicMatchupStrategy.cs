@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace CompetitionManager.MatchupEngine.Strategies
 {
-    internal sealed class DynamicMatchupStrategy : IMatchupStrategy
+    public sealed class DynamicMatchupStrategy : IMatchupStrategy
     {
         private int ReplayThreshold { get; } = int.MaxValue;
         private int CurrentRound { get; } = 1;

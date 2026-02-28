@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal struct Match
+    public struct Match
     {
         public string HomeTeam { get; set; } = string.Empty;
         public string AwayTeam { get; set; } = string.Empty;

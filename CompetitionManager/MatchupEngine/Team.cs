@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class Team(string name, int rating)
+    public sealed class Team(string name, int rating)
     {
         public string Name { get; set; } = name;
         public int Rating { get; set; } = rating;

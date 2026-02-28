@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class RatingUpdateService
+    public sealed class RatingUpdateService
     {
         private const int SeedingDecayRounds = 5;
         private Dictionary<string, Team> Teams { get; set; } = [];

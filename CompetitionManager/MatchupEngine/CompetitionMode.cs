@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal enum CompetitionMode
+    public enum CompetitionMode
     {
         None,
         RoundRobin,

@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class CompletedMatch
+    public sealed class CompletedMatch
     {
         public string HomeTeam { get; set; } = string.Empty;
         public string AwayTeam { get; set; } = string.Empty;

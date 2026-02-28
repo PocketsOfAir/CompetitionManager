@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine.Strategies
 {
-    internal interface IMatchupStrategy
+    public interface IMatchupStrategy
     {
         void ExportMatches();
     }

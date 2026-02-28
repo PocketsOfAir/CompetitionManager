@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine.Strategies
 {
-    internal sealed class RoundRobinMatchupStrategy : IMatchupStrategy
+    public sealed class RoundRobinMatchupStrategy : IMatchupStrategy
     {
         private List<Team> Teams { get; set; }
         private CompetitionDetails CompetitionDetails { get; set; }

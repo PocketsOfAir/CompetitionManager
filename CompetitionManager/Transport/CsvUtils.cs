@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CompetitionManager.Transport
 {
-    internal static class CsvUtils
+    public static class CsvUtils
     {
         public static List<Team> LoadTeams()
         {

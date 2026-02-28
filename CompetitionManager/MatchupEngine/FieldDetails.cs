@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class FieldDetails(string location, int fieldNumber) : IEquatable<FieldDetails>
+    public sealed class FieldDetails(string location, int fieldNumber) : IEquatable<FieldDetails>
     {
         public string Location { get; set; } = location;
         public int FieldNumber { get; set; } = fieldNumber;

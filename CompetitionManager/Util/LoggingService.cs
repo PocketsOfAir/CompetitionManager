@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.Util
 {
-    internal sealed class LoggingService
+    public sealed class LoggingService
     {
         private static readonly LoggingService _instance = new();
         public static LoggingService Instance => _instance;

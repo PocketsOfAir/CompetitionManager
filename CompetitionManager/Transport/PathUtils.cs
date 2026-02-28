@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.Transport
 {
-    internal static class PathUtils
+    public static class PathUtils
     {
         public static string GetOutputFilePath(string filename)
         {

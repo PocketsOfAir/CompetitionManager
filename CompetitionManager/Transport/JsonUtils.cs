@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace CompetitionManager.Transport
 {
-    internal static class JsonUtils
+    public static class JsonUtils
     {
         public static CompetitionDetails LoadCompetitionDetails()
         {

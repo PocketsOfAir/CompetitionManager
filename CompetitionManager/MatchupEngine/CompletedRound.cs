@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class CompletedRound
+    public sealed class CompletedRound
     {
         public List<CompletedMatch> Matches { get; set; } = [];
 

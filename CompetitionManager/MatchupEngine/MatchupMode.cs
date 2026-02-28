@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal enum MatchupMode
+    public enum MatchupMode
     {
         BestTotalScore,
         LeastWorstSingleScore,

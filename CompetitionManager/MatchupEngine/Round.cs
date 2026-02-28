@@ -1,6 +1,6 @@
 ﻿namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class Round
+    public sealed class Round
     {
         public Stack<Match> Matches { get; set; } = new Stack<Match>();
 

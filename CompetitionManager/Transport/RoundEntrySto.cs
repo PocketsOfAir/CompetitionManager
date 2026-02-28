@@ -3,7 +3,7 @@
 namespace CompetitionManager.Transport
 {
     [Delimiter(",")]
-    internal sealed class RoundEntrySto
+    public sealed class RoundEntrySto
     {
         [Index(0)]
         public string HomeTeam { get; set; } = string.Empty;

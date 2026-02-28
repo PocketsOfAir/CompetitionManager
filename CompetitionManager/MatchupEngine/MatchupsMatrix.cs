@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal sealed class MatchupsMatrix
+    public sealed class MatchupsMatrix
     {
         private Dictionary<string, int> TeamIdLookup { get; set; } = [];
 

@@ -2,7 +2,7 @@
 
 namespace CompetitionManager.MatchupEngine
 {
-    internal static class MatchupStrategyFactory
+    public static class MatchupStrategyFactory
     {
         public static IMatchupStrategy GetMatchupEngine(CompetitionDetails competitionDetails)
         {

@@ -3,7 +3,7 @@
 namespace CompetitionManager.Transport
 {
     [Delimiter(",")]
-    internal sealed class TeamSto
+    public sealed class TeamSto
     {
         [Index(0)]
         public string Name { get; set; } = string.Empty;
