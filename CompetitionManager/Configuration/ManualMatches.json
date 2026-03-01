@@ -1,0 +1,10 @@
+{
+  "Matches": [
+    {
+      "HomeTeam": "[Home Team Name]",
+      "AwayTeam": "[Away Team Name]",
+      "Location": "[Location Name]",
+      "FieldNumber": 1
+    }
+  ]
+}

@@ -98,7 +98,7 @@ namespace CompetitionManager.Transport
 
             foreach (var field in fields)
             {
-                field.Allocated = false;
+                field.Deallocate();
             }
 
             var round = new RoundSto();
@@ -138,7 +138,7 @@ namespace CompetitionManager.Transport
                         allocated = true;
                         if (fieldLookup.TryGetValue(preference.Field, out var matchedField))
                         {
-                            matchedField.Allocated = true;
+                            matchedField.Allocate();
                         }
                         else
                         {

@@ -8,7 +8,5 @@
         public List<LocationSto> Locations { get; set; } = [];
         public string Mode { get; set; } = string.Empty;
         public int? StartingRound { get; set; }
-
-        public List<StaticMatchSto> StaticMatches { get; set; } = [];
     }
 }

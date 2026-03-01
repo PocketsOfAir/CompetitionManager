@@ -8,6 +8,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
     {
         private int ReplayThreshold { get; } = int.MaxValue;
         private int CurrentRound { get; } = 1;
+        private List<Team> StaticTeams { get; } = [];
         private List<Team> Teams { get; }
         private List<CompletedRound> PreviousRounds { get; }
         private CompetitionDetails CompetitionDetails { get; }
@@ -15,26 +16,64 @@ namespace CompetitionManager.MatchupEngine.Strategies
         private int[,] MatchupCosts { get; }
         private Round NextRound { get; }
         private MatchupMode Mode { get; } = MatchupMode.BestTotalScore;
+        private List<Match> ManualMatches { get; } = [];
         private long PermutationsConsidered { get; set; } = 0;
 
         public DynamicMatchupStrategy(CompetitionDetails competitionDetails)
         {
+            CompetitionDetails = competitionDetails;
             var teams = CsvUtils.LoadTeams();
             PreviousRounds = CsvUtils.LoadCompletedRounds();
 
             var ratingUpdater = new RatingUpdateService(teams);
             ratingUpdater.UpdateRatingsForRounds(PreviousRounds);
 
+            var manualMatches = JsonUtils.LoadManualMatches();
+
             if (teams.Count % 2 != 0)
             {
                 teams.Add(Team.CreateBye());
             }
 
-            var orderedTeams = teams.OrderByDescending(t => t.Rating);
+            var orderedTeams = teams.OrderByDescending(t => t.Rating).ToList();
+
+            foreach (var matchSto in manualMatches.Matches)
+            {
+                var homeTeam = orderedTeams.FirstOrDefault(t => t.Name == matchSto.HomeTeam);
+                var awayTeam = orderedTeams.FirstOrDefault(t => t.Name == matchSto.AwayTeam);
+                var location = CompetitionDetails.Fields.FirstOrDefault(f => f.FieldNumber == matchSto.FieldNumber && f.Location == matchSto.Location);
+                if (homeTeam == null)
+                {
+                    LoggingService.Instance.Log($"Failed to find home team '{matchSto.HomeTeam}' for static match. Skipping.");
+                }
+                if (awayTeam == null)
+                {
+                    LoggingService.Instance.Log($"Failed to find away team '{matchSto.AwayTeam}' for static match. Skipping.");
+                }
+                if (location == null)
+                {
+                    LoggingService.Instance.Log($"Failed to field #{matchSto.FieldNumber} at location '{matchSto.Location}' for static match. Skipping.");
+                }
+                if (homeTeam != null && awayTeam != null && location != null)
+                {
+                    var match = new Match
+                    {
+                        HomeTeam = homeTeam.Name,
+                        AwayTeam = awayTeam.Name,
+                        Cost = 0,
+                        IsBye = false
+                    };
+                    orderedTeams.Remove(homeTeam);
+                    orderedTeams.Remove(awayTeam);
+                    StaticTeams.Add(homeTeam);
+                    StaticTeams.Add(awayTeam);
+                    location.AllocateToManualMatch();
+                    ManualMatches.Add(match);
+                }
+            }
             Teams = [.. orderedTeams];
 
             CurrentRound = PreviousRounds.Count + 1;
-            CompetitionDetails = competitionDetails;
             MatchupCosts = new int[Teams.Count, Teams.Count];
 
             for (int i = 0; i < Teams.Count; i++)
@@ -57,6 +96,13 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
             LoggingService.Instance.Log("");
             LoggingService.Instance.Log("Current Ratings:");
+            foreach (var team in StaticTeams)
+            {
+                if (team.IsBye == false)
+                {
+                    LoggingService.Instance.Log($"\tTeam: {team.Name}, Rating: {team.Rating}");
+                }
+            }
             foreach (var team in Teams)
             {
                 if (team.IsBye == false)
@@ -82,6 +128,12 @@ namespace CompetitionManager.MatchupEngine.Strategies
             LoggingService.Instance.Log($"Next round generated. Round score is {NextRound.RoundCost}");
 
             var output = new List<Match>();
+
+            foreach (var match in ManualMatches)
+            {
+                LoggingService.Instance.Log($"\t{match.HomeTeam} vs. {match.AwayTeam} (static match)");
+                output.Add(match);
+            }
 
             foreach (var match in NextRound.Matches)
             {
@@ -122,8 +174,15 @@ namespace CompetitionManager.MatchupEngine.Strategies
                 {
                     foreach (var match in round.Matches)
                     {
-                        TeamLookup[match.HomeTeam].MatchesPlayed++;
-                        TeamLookup[match.AwayTeam].MatchesPlayed++;
+                        //Teams with statically allocated games won't be in the team lookup, so check that they're there before incrementing the count
+                        if (TeamLookup.ContainsKey(match.HomeTeam))
+                        {
+                            TeamLookup[match.HomeTeam].MatchesPlayed++;
+                        }
+                        if (TeamLookup.ContainsKey(match.AwayTeam))
+                        {
+                            TeamLookup[match.AwayTeam].MatchesPlayed++;
+                        }
                     }
                 }
                 maxGamesPlayed = TeamLookup.Values.Select(t => t.MatchesPlayed).Max();
@@ -189,11 +248,15 @@ namespace CompetitionManager.MatchupEngine.Strategies
 
         private void SetCost(string team1, string team2, int cost)
         {
-            var team1Index = TeamLookup[team1].MatrixIndex;
-            var team2Index = TeamLookup[team2].MatrixIndex;
-            //set both t1:t2 and t2:t1 so that retrieval is order-agnostic
-            MatchupCosts[team1Index, team2Index] = cost;
-            MatchupCosts[team2Index, team1Index] = cost;
+            //Teams with statically allocated games won't be in the team lookup, so check that they're there before incrementing the count
+            if (TeamLookup.ContainsKey(team1) && TeamLookup.ContainsKey(team2))
+            {
+                var team1Index = TeamLookup[team1].MatrixIndex;
+                var team2Index = TeamLookup[team2].MatrixIndex;
+                //set both t1:t2 and t2:t1 so that retrieval is order-agnostic
+                MatchupCosts[team1Index, team2Index] = cost;
+                MatchupCosts[team2Index, team1Index] = cost;
+            }
         }
 
         private Round FindBestRound()
