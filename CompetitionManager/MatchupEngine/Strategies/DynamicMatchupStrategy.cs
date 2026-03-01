@@ -71,7 +71,7 @@ namespace CompetitionManager.MatchupEngine.Strategies
                     ManualMatches.Add(match);
                 }
             }
-            Teams = [.. orderedTeams];
+            Teams = orderedTeams;
 
             CurrentRound = PreviousRounds.Count + 1;
             MatchupCosts = new int[Teams.Count, Teams.Count];

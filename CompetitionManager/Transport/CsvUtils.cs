@@ -91,7 +91,12 @@ namespace CompetitionManager.Transport
 
         private static RoundSto GetRoundAsSto(List<Match> matches, DateTime startDate, int duration, List<FieldDetails> fields)
         {
-            if (matches.Count > fields.Count)
+            var fieldCount = fields.Count;
+            if (matches.Any(m => m.IsBye))
+            {
+                fieldCount++;
+            }
+            if (matches.Count > fieldCount)
             {
                 throw new InvalidDataException($"More matches in round ({matches.Count}) than fields defined in competition details ({fields.Count})");
             }

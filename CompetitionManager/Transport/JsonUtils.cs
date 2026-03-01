@@ -1,4 +1,5 @@
 ﻿using CompetitionManager.MatchupEngine;
+using CompetitionManager.Util;
 using System.Text.Json;
 
 namespace CompetitionManager.Transport
@@ -23,6 +24,11 @@ namespace CompetitionManager.Transport
             {
                 var manualMatchesJsonString = File.ReadAllText(manualMatchesPath);
                 manualMatchesSto = JsonSerializer.Deserialize<ManualMatchesSto>(manualMatchesJsonString) ?? throw new InvalidDataException("Failed to load ManualMatches.json");
+                LoggingService.Instance.Log($"Manual matches loaded. {manualMatchesSto.Matches.Count} matches are present");
+            }
+            else
+            {
+                LoggingService.Instance.Log("No manual matches");
             }
 
             return manualMatchesSto;
