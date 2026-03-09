@@ -52,6 +52,13 @@ namespace CompetitionManager.MatchupEngine
                 awayScore = 0;
                 exclude = true;
             }
+            else if (sto.HomeScore.Equals("tie", StringComparison.CurrentCultureIgnoreCase) && sto.AwayScore.Equals("tie", StringComparison.CurrentCultureIgnoreCase))
+            {
+                valid = true;
+                homeScore = 0;
+                awayScore = 0;
+                exclude = true;
+            }
             else if (float.TryParse(sto.HomeScore, out homeScore) & float.TryParse(sto.AwayScore, out awayScore))
             {
                 valid = true;
